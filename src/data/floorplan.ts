@@ -1,0 +1,144 @@
+export interface Point {
+    x: number;
+    y: number;
+  }
+
+export interface Room {
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    centerX: number;
+    centerY: number;
+    exitX: number;
+    exitY: number;
+  }
+
+export interface RoomData {
+    [key: string]: Room;
+  }
+
+export interface Junction {
+  [key: string]: Point;
+}
+
+export const svgContent = `
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" version="1.1" width="792" height="612" viewBox="0 0 792 612">
+  <defs>
+    <clipPath id="clip_0">
+      <path transform="matrix(1,0,0,-1,0,612)" d="M.000011802 0H792V612H.000011802Z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="clip_1">
+      <path transform="matrix(1,0,0,-1,0,612)" d="M.000011802 0H792V612H.000011802Z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="clip_2">
+      <path transform="matrix(1,0,0,-1,0,612)" d="M.000011802 0H792V612H.000011802Z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="clip_3">
+      <path transform="matrix(1,0,0,-1,0,612)" d="M.000011802 0H792V612H.000011802Z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="clip_4">
+      <path transform="matrix(1,0,0,-1,0,612)" d="M.000011802 0H792V612H.000011802Z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="clip_5">
+      <path transform="matrix(1,0,0,-1,0,612)" d="M.000011802 0H792V612H.000011802Z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="clip_6">
+      <path transform="matrix(1,0,0,-1,0,612)" d="M.000011802 0H792V612H.000011802Z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="clip_7">
+      <path transform="matrix(1,0,0,-1,0,612)" d="M.000011802 0H792V612H.000011802Z" clip-rule="evenodd"/>
+    </clipPath>
+    <clipPath id="clip_8">
+      <path transform="matrix(1,0,0,-1,0,612)" d="M.000011802 0H792V612H.000011802Z" clip-rule="evenodd"/>
+    </clipPath>
+  </defs>
+  <g>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M518.96 263H677.11V474.94H518.96Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M518.96 263H677.11V474.94H518.96Z"/>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M518.96 423.87H552.82907V474.94H518.96Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M518.96 423.87H552.82907V474.94H518.96Z"/>
+    <g clip-path="url(#clip_0)">
+      <text xml:space="preserve" transform="matrix(1 0 -0 1 0 612)" font-size="9.775" font-family="Calibri">
+        <tspan y="-446.2" x="525.58 530.8194 536.8212 542.0606">4N01</tspan>
+      </text>
+    </g>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M518.96 343.42H552.82907V394.49003H518.96Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M518.96 343.42H552.82907V394.49003H518.96Z"/>
+    <g clip-path="url(#clip_1)">
+      <text xml:space="preserve" transform="matrix(1 0 -0 1 0 612)" font-size="9.75" font-family="Calibri">
+        <tspan y="-365.65" x="525.58 530.81576 536.812 542.0477">4N04</tspan>
+      </text>
+    </g>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M581.1 343.41H614.969V394.48H581.1Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M581.1 343.41H614.969V394.48H581.1Z"/>
+    <g clip-path="url(#clip_2)">
+      <text xml:space="preserve" transform="matrix(1 0 -0 1 0 612)" font-size="9.775" font-family="Calibri">
+        <tspan y="-365.65" x="587.78 593.0194 599.02127 604.2606">4N05</tspan>
+      </text>
+    </g>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M643.23 423.87H677.099V474.94H643.23Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M643.23 423.87H677.099V474.94H643.23Z"/>
+    <g clip-path="url(#clip_3)">
+      <text xml:space="preserve" transform="matrix(1 0 -0 1 0 612)" font-size="9.775" font-family="Calibri">
+        <tspan y="-446.2" x="649.95 655.1894 661.21078 666.45016">4N03</tspan>
+      </text>
+    </g>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M643.22 343.41H677.089V394.48H643.22Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M643.22 343.41H677.089V394.48H643.22Z"/>
+    <g clip-path="url(#clip_4)">
+      <text xml:space="preserve" transform="matrix(1 0 -0 1 0 612)" font-size="9.775" font-family="Calibri">
+        <tspan y="-365.65" x="649.95 655.1894 661.1912 666.4306">4N06</tspan>
+      </text>
+    </g>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M518.96 262.96H552.82907V314.03H518.96Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M518.96 262.96H552.82907V314.03H518.96Z"/>
+    <g clip-path="url(#clip_5)">
+      <text xml:space="preserve" transform="matrix(1 0 -0 1 0 612)" font-size="9.775" font-family="Calibri">
+        <tspan y="-285.1" x="525.58 530.8194 536.8212 542.0606">4N11</tspan>
+      </text>
+    </g>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M581.1 262.95H614.969V314.02003H581.1Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M581.1 262.95H614.969V314.02003H581.1Z"/>
+    <g clip-path="url(#clip_6)">
+      <text xml:space="preserve" transform="matrix(1 0 -0 1 0 612)" font-size="9.75" font-family="Calibri">
+        <tspan y="-285.07" x="587.78 593.01577 599.012 604.24777">4N12</tspan>
+      </text>
+    </g>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M643.23 262.96H677.099V314.03H643.23Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M643.23 262.96H677.099V314.03H643.23Z"/>
+    <g clip-path="url(#clip_7)">
+      <text xml:space="preserve" transform="matrix(1 0 -0 1 0 612)" font-size="9.775" font-family="Calibri">
+        <tspan y="-285.1" x="649.97 655.20938 661.2112 666.45059">4N13</tspan>
+      </text>
+    </g>
+    <path transform="matrix(1,0,0,-1,0,612)" d="M581.1 423.87H614.969V474.94H581.1Z" fill="#ffffff" fill-rule="evenodd"/>
+    <path transform="matrix(1,0,0,-1,0,612)" stroke-width=".75" stroke-linecap="round" stroke-linejoin="round" fill="none" stroke="#000000" d="M581.1 423.87H614.969V474.94H581.1Z"/>
+    <g clip-path="url(#clip_8)">
+      <text xml:space="preserve" transform="matrix(1 0 -0 1 0 612)" font-size="9.775" font-family="Calibri">
+        <tspan y="-446.2" x="587.78 593.0194 599.02127 604.2606">4N02</tspan>
+      </text>
+    </g>
+  </g>
+</svg>
+`;
+
+// Room definitions with their boundaries and center points
+export const roomData: RoomData  = {
+    '4N01': { x: 518.96, y: 137.06, width: 33.87, height: 51.07, centerX: 535.9, centerY: 162.6, exitX: 552.83  , exitY: 162.6 },
+    '4N02': { x: 581.1, y: 137.06, width: 33.87, height: 51.07, centerX: 598.0, centerY: 162.6, exitX: 598  , exitY: 188.14},
+    '4N03': { x: 643.23, y: 137.06, width: 33.87, height: 51.07, centerX: 660.16, centerY: 162.6, exitX: 643.23  , exitY: 162.6 },
+    '4N04': { x: 518.96, y: 217.51, width: 33.87, height: 51.07, centerX: 535.9, centerY: 243.0, exitX: 552.83  , exitY: 243 },
+    '4N05': { x: 581.1, y: 217.51, width: 33.87, height: 51.07, centerX: 598.0, centerY: 243.0, exitX: 581.1  , exitY: 217.51 },
+    '4N06': { x: 643.22, y: 217.51, width: 33.87, height: 51.07, centerX: 660.16, centerY: 243.0, exitX: 643.23  , exitY: 243 },
+    '4N11': { x: 518.96, y: 297.96, width: 33.87, height: 51.07, centerX: 535.9, centerY: 323.5, exitX: 552.83 , exitY: 323.5 },
+    '4N12': { x: 581.1, y: 297.96, width: 33.87, height: 51.07, centerX: 598.0, centerY: 323.5, exitX: 598 , exitY:  297.96 },
+    '4N13': { x: 643.23, y: 297.96, width: 33.87, height: 51.07, centerX: 660.16, centerY: 323.5, exitX: 643.23 , exitY: 323.5  }
+  };
+
+  export const junctions: Junction = {
+    'J1': {x: 566.96, y: 202.82},
+    'J2': {x: 629.1, y: 202.82},
+    'J3': {x: 566.96, y: 283.27},
+    'J4': {x: 629.1, y: 283.27}
+  }
