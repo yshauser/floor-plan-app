@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
-import { employeeList } from '../data/seatPlan';
-// import type { Employee } from '../data/seatPlan';
+import { employeeList, meetingRoomList } from '../data/seatPlan';
+import type { MeetingRoom } from '../data/seatPlan';
 import { Search, MapPin, Users, X, Building2, Route } from 'lucide-react';
 import './seatFinder.css';
 
@@ -12,6 +12,7 @@ interface SeatFinderProps {
 const SeatFinder: React.FC<SeatFinderProps> = ({ onToggleMap, showMap }) => {
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
+  const [selectedRoom, setSelectedRoom] = useState<MeetingRoom | null>(null);
 
   const filteredEmployees = useMemo(() => {
     if (!searchQuery.trim()) {
@@ -25,6 +26,17 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onToggleMap, showMap }) => {
     );
   }, [searchQuery]);
 
+  const filteredMeetingRooms = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return [];
+    }
+  
+    return meetingRoomList.filter(room =>
+      room.Name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      room.roomNumber.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  }, [searchQuery]);
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
   };
@@ -33,6 +45,13 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onToggleMap, showMap }) => {
     setSelectedEmployee(employee);
     setSearchQuery(`${employee.firstName} ${employee.lastName}`);
   };
+
+  const selectMeetingRoom = (room: MeetingRoom) => {
+    setSelectedRoom(room);
+    setSelectedEmployee(null); // deselect employee
+    setSearchQuery(room.Name);
+  };
+
   return (
     <div className="seat-finder-container">
       <div className="seat-finder-content">
@@ -59,7 +78,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onToggleMap, showMap }) => {
             </div>
             <input
               type="text"
-              placeholder="Search by name, seat number, or department..."
+              placeholder="Search by name, seat/room number, or department..."
               value={searchQuery}
               onChange={handleSearchChange}
               className="search-input"
@@ -92,11 +111,38 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onToggleMap, showMap }) => {
             </div>
           )}
           
-          {searchQuery && filteredEmployees.length > 0 && (
+          {selectedRoom && (
+            <div className="selected-employee-container">
+              <div className="selected-employee-info-wrapper">
+                <div className="selected-employee-details">
+                  <div className="selected-employee-icon-wrapper">
+                    <Building2 className="selected-employee-icon" />
+                  </div>
+                  <div>
+                    <h3 className="selected-employee-name">
+                      {selectedRoom.Name}
+                    </h3>
+                    <p className="selected-employee-department">
+                      Room {selectedRoom.roomNumber} • Floor {selectedRoom.floor} • Wing {selectedRoom.wing} • Capacity {selectedRoom.capacity} {selectedRoom.VC ? '• VC' : ''}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => setSelectedRoom(null)}
+                  className="selected-employee-close-button"
+                >
+                  <X className="selected-employee-close-icon" />
+                </button>
+              </div>
+            </div>
+          )}
+
+
+          {searchQuery && (filteredEmployees.length > 0 || filteredMeetingRooms.length > 0) && (
             <div className="search-results-container">
               <h3 className="search-results-title">
                 <Users className="search-results-icon" />
-                Search Results ({filteredEmployees.length})
+                Search Results ({filteredEmployees.length + filteredMeetingRooms.length})
               </h3>
               <div className="search-results-list custom-scrollbar">
                 {filteredEmployees.map((employee, index) => (
@@ -129,11 +175,44 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onToggleMap, showMap }) => {
                     </div>
                   </div>
                 ))}
+
+                {filteredMeetingRooms.map((room, index) => (
+                        <div
+                          key={`room-${index}`}
+                          onClick={() => selectMeetingRoom(room)}
+                          className="search-result-item group"
+                        >
+                          <div className="search-result-content">
+                            <div className="search-result-employee-info">
+                              <div className="search-result-avatar-wrapper group-hover:from-green-200 group-hover:to-teal-200">
+                                <span className="search-result-avatar-text">
+                                  {room.Name[0]}
+                                </span>
+                              </div>
+                              <div>
+                                <h4 className="search-result-name group-hover:text-green-600">
+                                  {room.Name}
+                                </h4>
+                                <p className="search-result-department">Room {room.roomNumber}</p>
+                              </div>
+                            </div>
+                            <div className="search-result-location">
+                              <div className="search-result-seat">
+                                <MapPin className="search-result-map-pin-icon" />
+                                {room.roomNumber}
+                              </div>
+                              <p className="search-result-floor-wing">
+                                Floor {room.floor} • Wing {room.wing} • Capacity {room.capacity} {room.VC ? '• VC' : ''}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
               </div>
             </div>
           )}
 
-          {searchQuery && filteredEmployees.length === 0 && (
+          {searchQuery && filteredEmployees.length === 0 && filteredMeetingRooms.length === 0 && (
             <div className="no-employees-found-container">
               <div className="no-employees-found-icon-wrapper">
                 <Search className="no-employees-found-icon" />
