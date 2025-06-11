@@ -1,0 +1,15 @@
+:root {
+  direction: rtl;  /* Since your app uses Hebrew */
+}
+
+body {
+  margin: 0;
+}
+
+.app-container {
+  min-height: 100vh;
+}
+
+.map-container {
+  border-top: 1px solid #d1d5db; /* border-t border-gray-300 */
+}
