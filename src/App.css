@@ -1,5 +1,5 @@
 :root {
-  direction: rtl;  /* Since your app uses Hebrew */
+  direction: ltr;  /* Since your app uses English */
 }
 
 body {

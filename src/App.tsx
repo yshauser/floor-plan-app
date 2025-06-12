@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import FloorPlan from './components/FloorPlan';
 import SeatFinder from './components/seatFinder';
 import { svgContent } from './data/floorplan';
+import Header from './components/Header';
 
 const App: React.FC = () => {
   const [showMap, setShowMap] = useState<boolean>(false);
@@ -12,6 +13,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen">
+      <Header/>
       <SeatFinder onToggleMap={toggleMap} showMap={showMap} />
       
       {showMap && (

@@ -98,7 +98,8 @@
 }
 
 .search-input {
-  width: 100%; /* w-full */
+  /*width: 100%;  w-full */
+  width: -webkit-fill-available;
   padding-left: 3rem; /* pl-12 */
   padding-right: 1rem; /* pr-4 */
   padding-top: 1rem; /* py-4 */
