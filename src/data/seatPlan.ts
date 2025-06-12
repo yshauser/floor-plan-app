@@ -197,7 +197,7 @@ export const employeeList: Employee[] = [
 
 export interface MeetingRoom {
   Name: string;
-  VC: boolean;
+  Type: string;
   roomNumber: string;
   floor: number;
   wing: string;
@@ -205,20 +205,40 @@ export interface MeetingRoom {
 }
 
 export const meetingRoomList: MeetingRoom[] = [
-  { Name: "Ben Shemen", VC: false, roomNumber: "4N04", floor: 4, wing: "N", capacity: 4 },
-  { Name: "Tabor", VC: false, roomNumber: "4N15", floor: 4, wing: "N", capacity: 4 },
-  { Name: "Masada", VC: false, roomNumber: "4N27", floor: 4, wing: "N", capacity: 4 },
-  { Name: "Negev", VC: true, roomNumber: "4N32", floor: 4, wing: "N", capacity: 8 },
-  { Name: "Galil", VC: true, roomNumber: "4N42", floor: 4, wing: "N", capacity: 8 },
-  { Name: "Kinneret", VC: false, roomNumber: "4N54", floor: 4, wing: "N", capacity: 4 },
-  { Name: "Jerusalem", VC: true, roomNumber: "4N56", floor: 4, wing: "N", capacity: 11 },
-  { Name: "Shemer", VC: false, roomNumber: "4S02", floor: 4, wing: "S", capacity: 4 },
-  { Name: "Eilat", VC: false, roomNumber: "4S09", floor: 4, wing: "S", capacity: 4 },
-  { Name: "Carmel", VC: false, roomNumber: "4S13", floor: 4, wing: "S", capacity: 4 },
-  { Name: "Tel Aviv", VC: true, roomNumber: "4S20", floor: 4, wing: "S", capacity: 11 },
-  { Name: "Megiddo", VC: false, roomNumber: "4S24", floor: 4, wing: "S", capacity: 4 },
-  { Name: "Hermon", VC: true, roomNumber: "4S32", floor: 4, wing: "S", capacity: 8 },
-  { Name: "Arbel", VC: false, roomNumber: "4S37", floor: 4, wing: "S", capacity: 4 },
-  { Name: "Meron", VC: false, roomNumber: "4S44", floor: 4, wing: "S", capacity: 4 },
-  { Name: "Haifa", VC: true, roomNumber: "4S48", floor: 4, wing: "S", capacity: 8 }
+  { Name: "Ben Shemen", Type: "Meeting", roomNumber: "4N04", floor: 4, wing: "N", capacity: 4 },
+  { Name: "Tabor", Type: "Meeting", roomNumber: "4N15", floor: 4, wing: "N", capacity: 4 },
+  { Name: "Masada", Type: "Meeting", roomNumber: "4N27", floor: 4, wing: "N", capacity: 4 },
+  { Name: "Negev", Type: "Meeting + VC", roomNumber: "4N32", floor: 4, wing: "N", capacity: 8 },
+  { Name: "Galil", Type: "Meeting + VC", roomNumber: "4N42", floor: 4, wing: "N", capacity: 8 },
+  { Name: "Kinneret", Type: "Meeting", roomNumber: "4N54", floor: 4, wing: "N", capacity: 4 },
+  { Name: "Jerusalem", Type: "Meeting + VC", roomNumber: "4N56", floor: 4, wing: "N", capacity: 11 },
+  { Name: "Shemer", Type: "Meeting", roomNumber: "4S02", floor: 4, wing: "S", capacity: 4 },
+  { Name: "Eilat", Type: "Meeting", roomNumber: "4S09", floor: 4, wing: "S", capacity: 4 },
+  { Name: "Carmel", Type: "Meeting", roomNumber: "4S13", floor: 4, wing: "S", capacity: 4 },
+  { Name: "Tel Aviv", Type: "Meeting + VC", roomNumber: "4S20", floor: 4, wing: "S", capacity: 11 },
+  { Name: "Megiddo", Type: "Meeting", roomNumber: "4S24", floor: 4, wing: "S", capacity: 4 },
+  { Name: "Hermon", Type: "Meeting + VC", roomNumber: "4S32", floor: 4, wing: "S", capacity: 8 },
+  { Name: "Arbel", Type: "Meeting", roomNumber: "4S37", floor: 4, wing: "S", capacity: 4 },
+  { Name: "Meron", Type: "Meeting", roomNumber: "4S44", floor: 4, wing: "S", capacity: 4 },
+  { Name: "Haifa", Type: "Meeting + VC", roomNumber: "4S48", floor: 4, wing: "S", capacity: 8 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4N03", floor: 4, wing: "N", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4N11", floor: 4, wing: "N", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4N12", floor: 4, wing: "N", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4N14", floor: 4, wing: "N", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4N25", floor: 4, wing: "N", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4N26", floor: 4, wing: "N", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4N46", floor: 4, wing: "N", capacity: 1 },
+
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S03", floor: 4, wing: "S", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S05", floor: 4, wing: "S", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S07", floor: 4, wing: "S", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S10", floor: 4, wing: "S", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S14", floor: 4, wing: "S", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S17", floor: 4, wing: "S", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S18", floor: 4, wing: "S", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S25", floor: 4, wing: "S", capacity: 1 },
+  { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S38", floor: 4, wing: "S", capacity: 1 },
+  
+
+
 ]

@@ -123,7 +123,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onToggleMap, showMap }) => {
                       {selectedRoom.Name}
                     </h3>
                     <p className="selected-employee-department">
-                      Room {selectedRoom.roomNumber} • Floor {selectedRoom.floor} • Wing {selectedRoom.wing} • Capacity {selectedRoom.capacity} {selectedRoom.VC ? '• VC' : ''}
+                      Room {selectedRoom.roomNumber} • Floor {selectedRoom.floor} • Wing {selectedRoom.wing} • Capacity {selectedRoom.capacity} • {selectedRoom.Type} Room 
                     </p>
                   </div>
                 </div>
@@ -193,7 +193,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onToggleMap, showMap }) => {
                                 <h4 className="search-result-name group-hover:text-green-600">
                                   {room.Name}
                                 </h4>
-                                <p className="search-result-department">Room {room.roomNumber}</p>
+                                <p className="search-result-department"> {room.Type} Room • Capacity {room.capacity} </p>
                               </div>
                             </div>
                             <div className="search-result-location">
@@ -202,7 +202,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onToggleMap, showMap }) => {
                                 {room.roomNumber}
                               </div>
                               <p className="search-result-floor-wing">
-                                Floor {room.floor} • Wing {room.wing} • Capacity {room.capacity} {room.VC ? '• VC' : ''}
+                                Floor {room.floor} • Wing {room.wing} 
                               </p>
                             </div>
                           </div>
