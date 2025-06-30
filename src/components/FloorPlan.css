@@ -10,3 +10,36 @@
 .floor-plan-content {
   padding: 2rem; /* p-8 */
 }
+.floor-plan-svg-container {
+  width: 100%;
+  height: 100vh; /* or any desired height */
+  overflow: hidden;
+  position: relative;
+}
+
+.floor-plan-svg {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* .highlight {
+  fill: red;
+  font-weight: bold;
+} */
+.highlight {
+  fill: red;
+  font-weight: bold;
+  background-color: yellow;
+}
+
+.highlight-start {
+  fill: blue;
+  font-weight: bold;
+}
+
+.highlight-end {
+  fill: green;
+  font-weight: bold;
+}
+

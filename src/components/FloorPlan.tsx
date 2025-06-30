@@ -1,16 +1,50 @@
 import React, { useState, useRef } from 'react';
 // import  { roomData, junctions } from '../data/floorplan';
-import type { Point,  } from '../data/floorplan';//RoomData, Junction
+import type { Point } from '../data/floorplan';//RoomData, Junction
 // import { employeeList } from '../data/employeeList'; // adjust the path as needed
-import { employeeList } from '../data/seatPlan';
-import { Search, MapPin, Navigation, Users, X,  } from 'lucide-react'; //ChevronDown, Building2, Route
+import { Search, Navigation } from 'lucide-react'; //ChevronDown, Building2, Route, Users
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import './FloorPlan.css';
 
 
 
 interface FloorPlanProps {
   svgContent: string;
+  searchValue: string;
+  setSearchValue: (value: string) => void;
 }
+
+
+
+// function highlightSvgText(svg: string, query: string): string {
+//   if (!query) return svg;
+
+//   const regex = new RegExp(`(<tspan[^>]*>)([^<]*?)(${query})([^<]*?)(</tspan>)`, 'gi');
+//   return svg.replace(regex, (_, start, before, match, after, end) => {
+//     return `${start}${before}<tspan class="highlight">${match}</tspan>${after}${end}`;
+//   });
+// }
+
+function highlightSvgText(svg: string, search: string, start: string, end: string): string {
+  if (!svg) return svg;
+
+  const highlight = (text: string, className: string) => {
+    const regex = new RegExp(`(<tspan[^>]*>)([^<]*?)(${text})([^<]*?)(</tspan>)`, 'gi');
+    return (input: string) =>
+      input.replace(regex, (_, startTag, before, match, after, endTag) => {
+        return `${startTag}${before}<tspan class="${className}">${match}</tspan>${after}${endTag}`;
+      });
+  };
+
+  let modifiedSvg = svg;
+
+  if (start) modifiedSvg = highlight(start, 'highlight-start')(modifiedSvg);
+  if (end) modifiedSvg = highlight(end, 'highlight-end')(modifiedSvg);
+  if (search && search !== end) modifiedSvg = highlight(search, 'highlight')(modifiedSvg);
+
+  return modifiedSvg;
+}
+
 
 
 // A* pathfinding algorithm
@@ -20,28 +54,7 @@ interface FloorPlanProps {
 
 // function findBestExitPoint(roomId: string, rooms: RoomData): Point {
 //   const room = rooms[roomId];
-  
-//   // Based on the SVG coordinates, let's find the nearest corridor point
-//   // The rooms seem to be arranged in a 3x3 grid with corridors between them
-  
-//   // Calculate potential exit points (4 sides of the room)
-//   // const exitPoints = [
-//   //   { x: room.centerX, y: room.y - 2 }, // Bottom
-//   //   { x: room.centerX, y: room.y + room.height + 2 }, // Top  
-//   //   { x: room.x - 2, y: room.centerY }, // Left
-//   //   { x: room.x + room.width + 2, y: room.centerY }, // Right
-//   // ];
-  
-//   // Filter out points that are out of bounds or inside other rooms
-//   // const validExits = exitPoints.filter(point => 
-//   //   point.x >= 500 && point.x <= 700 && 
-//   //   point.y >= 130 && point.y <= 480 &&
-//   //   !isPointInRoom(point.x, point.y, rooms)
-//   // );
-  
-//   // Return the first valid exit point, or center if none found
-//   // return validExits.length > 0 ? validExits[0] : { x: room.centerX, y: room.centerY };
-//   return {x: room.exitX, y: room.exitY};
+//     return {x: room.exitX, y: room.exitY};
 // }
 
 // function findBestEntryPoint(roomId: string, rooms: RoomData): Point {
@@ -149,14 +162,11 @@ interface FloorPlanProps {
 //   return null; // No path found
 // }
 
-const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent }) => {
-  const [searchQuery, setSearchQuery] = useState<string>('');
+const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearchValue }) => {
   const [startRoom, setStartRoom] = useState<string>('');
   const [endRoom, setEndRoom] = useState<string>('');
   const [path, setPath] = useState<Point[]>([]);
   const svgRef = useRef<HTMLDivElement>(null);
-
-  const [showEmployees, setShowEmployees] = useState(false);
 
   const findNavigation = () => {
     if (!startRoom || !endRoom) {
@@ -191,8 +201,8 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent }) => {
               <input
                 type="text"
                 placeholder="Search rooms..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
                 className="floor-plan-input"
               />
             </div>
@@ -229,13 +239,6 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent }) => {
             </button>
             <div className="floor-plan-action-buttons">
               <button
-                onClick={() => setShowEmployees(true)}
-                className="floor-plan-staff-button"
-              >
-                <Users className="floor-plan-staff-icon" />
-                Staff
-              </button>
-              <button
                 onClick={clearPath}
                 className="floor-plan-clear-button"
               >
@@ -245,7 +248,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent }) => {
           </div>
         </div>
         
-        <div className="floor-plan-legend">
+        {/* <div className="floor-plan-legend">
           <div className="floor-plan-legend-rooms">
             <p className="floor-plan-legend-title">Available Rooms:</p>
             <p className="floor-plan-legend-text">4N01, 4N02, 4N03, 4N04, 4N05</p>
@@ -267,76 +270,42 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent }) => {
               </span>
             </div>
           </div>
-        </div>
-
-        {/* Employee Modal */}
-        {showEmployees && (
-          <div className="floor-plan-employee-modal-overlay">
-            <div className="floor-plan-employee-modal-content">
-              <div className="floor-plan-employee-modal-header">
-                <div className="floor-plan-employee-modal-title-wrapper">
-                  <Users className="floor-plan-employee-modal-icon" />
-                  <h2 className="floor-plan-employee-modal-title">Employee Directory</h2>
-                </div>
-                <button
-                  onClick={() => setShowEmployees(false)}
-                  className="floor-plan-employee-modal-close-button"
-                >
-                  <X className="floor-plan-employee-modal-close-icon" />
-                </button>
-              </div>
-              <div className="floor-plan-employee-modal-table-container custom-scrollbar">
-                <table className="floor-plan-employee-table">
-                  <thead className="floor-plan-employee-table-header">
-                    <tr>
-                      <th className="floor-plan-employee-table-header-cell">Employee</th>
-                      <th className="floor-plan-employee-table-header-cell">Location</th>
-                      <th className="floor-plan-employee-table-header-cell">Department</th>
-                    </tr>
-                  </thead>
-                  <tbody className="floor-plan-employee-table-body">
-                    {employeeList.map((emp, idx) => (
-                      <tr key={idx} className="floor-plan-employee-table-row">
-                        <td className="floor-plan-employee-table-cell">
-                          <div className="floor-plan-employee-info">
-                            <div className="floor-plan-employee-avatar-wrapper">
-                              <span className="floor-plan-employee-avatar-text">
-                                {emp.firstName[0]}{emp.lastName[0]}
-                              </span>
-                            </div>
-                            <div>
-                              <p className="floor-plan-employee-name">{emp.firstName} {emp.lastName}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="floor-plan-employee-table-cell">
-                          <div className="floor-plan-employee-location">
-                            <MapPin className="floor-plan-employee-location-icon" />
-                            {emp.seatNumber}
-                          </div>
-                          <p className="floor-plan-employee-location-details">Floor {emp.floor} • Wing {emp.wing}</p>
-                        </td>
-                         <td className="floor-plan-employee-table-cell">
-                          <span className="floor-plan-employee-department-tag">
-                            {emp.department}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
+        </div> */}
 
         <div className="floor-plan-svg-container">
-          <div
-            ref={svgRef}
-            dangerouslySetInnerHTML={{ __html: svgContent }}
-            className="floor-plan-svg"
-            style={{ minHeight: '400px' }}
-          />
+
+          <TransformWrapper>
+            {/* {({ zoomIn, zoomOut, resetTransform }) => ( */}
+              <>
+                {/* <div className="tools">
+                  <button onClick={()=>zoomIn}>Zoom In</button>
+                  <button onClick={()=>zoomOut}>Zoom Out</button>
+                  <button onClick={()=>resetTransform}>Reset</button>
+                </div> */}
+                {/* <TransformComponent>
+                  <img
+                    src="/FloorPlan.jpg"
+                    alt="Floor Plan"
+                    className="floor-plan-svg"
+                    style={{ minHeight: '400px', width: '100%', objectFit: 'contain' }}
+                  />
+                </TransformComponent> */}
+                <TransformComponent>
+                <div
+                  ref={svgRef}
+                  dangerouslySetInnerHTML={{
+                    __html: highlightSvgText(svgContent, searchValue, startRoom, endRoom),
+                  }}
+                  className="floor-plan-svg"
+                  style={{ minHeight: '400px' }}
+                />
+                </TransformComponent>
+
+              </>
+             {/* )} */}
+          </TransformWrapper>
+
+
         </div>
         
         {path.length > 0 && (

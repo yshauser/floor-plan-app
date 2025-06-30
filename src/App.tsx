@@ -1,27 +1,40 @@
 import React, { useState } from 'react';
 import FloorPlan from './components/FloorPlan';
 import SeatFinder from './components/seatFinder';
-import { svgContent } from './data/floorplan';
 import Header from './components/Header';
+import { svgContent } from './data/floorplan';
 
 const App: React.FC = () => {
-  const [showMap, setShowMap] = useState<boolean>(false);
+  const [showMap, setShowMap] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
-  const toggleMap = () => {
-    setShowMap(!showMap);
-  };
+  // const handleShowOnMap = (value: string) => {
+  //   setSearchValue(value);
+  //   setShowMap(true);
+  // };
 
   return (
-    <div className="min-h-screen">
-      <Header/>
-      <SeatFinder onToggleMap={toggleMap} showMap={showMap} />
-      
+    <>
+      <Header />
+      {/* <SeatFinder onShowOnMap={handleShowOnMap} /> */}
+      {/* {showMap && <FloorPlan svgContent={svgContent} initialSearch={searchValue} />} */}
+      <SeatFinder
+        searchValue={searchValue}
+        setSearchValue={setSearchValue}
+        onShowOnMap={(value) => {
+          setSearchValue(value);
+          setShowMap(true);
+        }}
+      />
+
       {showMap && (
-        <div className="border-t border-gray-300">
-          <FloorPlan svgContent={svgContent} />
-        </div>
+        <FloorPlan
+          svgContent={svgContent}
+          searchValue={searchValue}
+          setSearchValue={setSearchValue}
+        />
       )}
-    </div>
+    </>
   );
 };
 
