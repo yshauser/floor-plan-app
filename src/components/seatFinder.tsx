@@ -46,7 +46,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   }, [searchValue]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(event.target.value);
+    setSearchValue((event.target.value).trim());
   };
 
   const selectEmployee = (employee: any) => {
@@ -58,8 +58,20 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const selectMeetingRoom = (room: MeetingRoom) => {
     setSelectedRoom(room);
     setSelectedEmployee(null);
-    setSearchValue(room.Name);
+    setSearchValue((room.Name).trim());
   };
+
+  const clearSelection = () => {
+    setSelectedEmployee(null);
+    setSelectedRoom(null);
+    // Keep the search value to re-show the results
+  };
+
+  // Check if we should show search results
+  const shouldShowResults = searchValue.trim() && 
+    (filteredEmployees.length > 0 || filteredMeetingRooms.length > 0) && 
+    !selectedEmployee && 
+    !selectedRoom;
 
   return (
     <div className="seat-finder-container">
@@ -83,7 +95,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
             />
           </div>
 
-          {selectedEmployee && (
+          {selectedEmployee  && (
             <div className="selected-employee-container">
               <div className="selected-employee-info-wrapper">
                 <div className="selected-employee-details">
@@ -100,21 +112,20 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    setSelectedEmployee(null);
-                    setSearchValue('');
-                  }}
+                  onClick={clearSelection}
                   className="selected-employee-close-button"
                 >
                   <X className="selected-employee-close-icon" />
                 </button>
               </div>
-              <button
-                className="map-toggle-button"
-                onClick={() => onShowOnMap(selectedEmployee.seatNumber)}
-              >
-                Show on Map
-              </button>
+              {selectedEmployee.floor === 4 && (
+                <button
+                  className="map-toggle-button"
+                  onClick={() => onShowOnMap(selectedEmployee.seatNumber)}
+                >
+                  Show on Map
+                </button>
+              )}
             </div>
           )}
 
@@ -133,25 +144,24 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
                   </div>
                 </div>
                 <button
-                  onClick={() => {
-                    setSelectedRoom(null);
-                    setSearchValue('');
-                  }}
+                  onClick={clearSelection}
                   className="selected-employee-close-button"
                 >
                   <X className="selected-employee-close-icon" />
                 </button>
               </div>
+              {selectedRoom.floor === 4 && (
               <button
                 className="map-toggle-button"
                 onClick={() => onShowOnMap(selectedRoom.roomNumber)}
               >
                 Show on Map
               </button>
+              )}
             </div>
           )}
 
-          {searchValue && (filteredEmployees.length > 0 || filteredMeetingRooms.length > 0) && (
+          {shouldShowResults && (
             <div className="search-results-container">
               <h4 className="search-results-title">
                 Search Results ({filteredEmployees.length + filteredMeetingRooms.length})
@@ -226,7 +236,9 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
 
           {searchValue.trim() &&
             filteredEmployees.length === 0 &&
-            filteredMeetingRooms.length === 0 && (
+            filteredMeetingRooms.length === 0 &&
+            !selectedEmployee &&
+            !selectedRoom && (
               <div className="no-employees-found-container">
                 <div className="no-employees-found-message">
                   No employees found matching your search

@@ -54,6 +54,7 @@ const Header: React.FC = () => {
           <div className="about-modal-content" onClick={(e) => e.stopPropagation()}>
           <h2>Seat Finder</h2>
             <p>Version: {packageJson.version}</p>
+            <p>Date: {packageJson.date}</p>
             <button onClick={() => setShowAbout(false)} className="about-close-button">Close</button>
           </div>
         </div>

@@ -30,8 +30,12 @@ const App: React.FC = () => {
       {showMap && (
         <FloorPlan
           svgContent={svgContent}
-          searchValue={searchValue}
+          searchValue={searchValue.trim()}
           setSearchValue={setSearchValue}
+          onClose={()=>{
+            console.log('Floor plan closed');
+            setShowMap(false);
+          }}
         />
       )}
     </>
