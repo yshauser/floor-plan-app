@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react'; //useRef
 import type { Point } from '../data/floorplan';
 import { Search, Navigation, X } from 'lucide-react'; //ChevronDown, Building2, Route, Users
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
@@ -24,25 +24,25 @@ interface FloorPlanProps {
 //   });
 // }
 
-function highlightSvgText(svg: string, search: string, start: string, end: string): string {
-  if (!svg) return svg;
+// function highlightSvgText(svg: string, search: string, start: string, end: string): string {
+//   if (!svg) return svg;
 
-  const highlight = (text: string, className: string) => {
-    const regex = new RegExp(`(<tspan[^>]*>)([^<]*?)(${text})([^<]*?)(</tspan>)`, 'gi');
-    return (input: string) =>
-      input.replace(regex, (_, startTag, before, match, after, endTag) => {
-        return `${startTag}${before}<tspan class="${className}">${match}</tspan>${after}${endTag}`;
-      });
-  };
+//   const highlight = (text: string, className: string) => {
+//     const regex = new RegExp(`(<tspan[^>]*>)([^<]*?)(${text})([^<]*?)(</tspan>)`, 'gi');
+//     return (input: string) =>
+//       input.replace(regex, (_, startTag, before, match, after, endTag) => {
+//         return `${startTag}${before}<tspan class="${className}">${match}</tspan>${after}${endTag}`;
+//       });
+//   };
 
-  let modifiedSvg = svg;
+//   let modifiedSvg = svg;
 
-  if (start) modifiedSvg = highlight(start, 'highlight-start')(modifiedSvg);
-  if (end) modifiedSvg = highlight(end, 'highlight-end')(modifiedSvg);
-  if (search && search !== end) modifiedSvg = highlight(search, 'highlight')(modifiedSvg);
+//   if (start) modifiedSvg = highlight(start, 'highlight-start')(modifiedSvg);
+//   if (end) modifiedSvg = highlight(end, 'highlight-end')(modifiedSvg);
+//   if (search && search !== end) modifiedSvg = highlight(search, 'highlight')(modifiedSvg);
 
-  return modifiedSvg;
-}
+//   return modifiedSvg;
+// }
 
 
 
@@ -162,11 +162,12 @@ function highlightSvgText(svg: string, search: string, start: string, end: strin
 // }
 
 const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearchValue, onClose }) => {
-  const [startRoom, setStartRoom] = useState<string>('');
+  // const [startRoom, setStartRoom] = useState<string>('');
   const [endRoom, setEndRoom] = useState<string>('');
   const [showPoints, setShowPoints] = useState<boolean>(false);
-  const [path, setPath] = useState<Point[]>([]);
-  const svgRef = useRef<HTMLDivElement>(null);
+  // const [path, setPath] = useState<Point[]>([]);
+  // const svgRef = useRef<HTMLDivElement>(null);
+  console.log ('no svgcontent', svgContent);
 
   const filteredPoints = points.filter(point => !point.label.startsWith('J'));
   const shouldShowPoint = (label: string) => {
@@ -357,7 +358,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
           </TransformWrapper>
         </div>
 
-        {path.length > 0 && (
+        {/* {path.length > 0 && (
           <div className="floor-plan-navigation-message">
             <div className="floor-plan-navigation-message-content">
               <div className="floor-plan-navigation-message-icon-wrapper">
@@ -371,7 +372,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
               </div>
             </div>
           </div>
-        )}
+        )} */}
       </div>
 
       {/* <style>{`
