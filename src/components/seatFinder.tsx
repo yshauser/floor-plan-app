@@ -52,13 +52,13 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const selectEmployee = (employee: any) => {
     setSelectedEmployee(employee);
     setSelectedRoom(null);
-    setSearchValue(`${employee.firstName} ${employee.lastName}`);
+    // setSearchValue(`${employee.firstName} ${employee.lastName}`);
   };
 
   const selectMeetingRoom = (room: MeetingRoom) => {
     setSelectedRoom(room);
     setSelectedEmployee(null);
-    setSearchValue((room.Name).trim());
+    // setSearchValue((room.Name).trim());
   };
 
   const clearSelection = () => {
@@ -170,7 +170,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
                 {filteredEmployees.map((employee, index) => (
                   <div
                     key={index}
-                    onClick={() => selectEmployee(employee)}
+                    onClick={() => {selectEmployee(employee)}}
                     className="search-result-item group"
                   >
                     <div className="search-result-content">

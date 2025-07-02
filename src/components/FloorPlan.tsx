@@ -325,17 +325,23 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
                         style={{
                           position: 'absolute',
                           left: `${point.x}%`,
-                          top: `${point.y}%`,
+                          top: `${point.y-0.5}%`,
                           transform: 'translate(-50%, -50%)',
                           backgroundColor: getPointColor(point.label),
-                          color: 'white',
-                          padding: '2px 4px',
-                          borderRadius: '4px',
-                          fontSize: '0.75rem',
+                          // color: 'white',
+                          // padding: '2px 4px',
+                          // borderRadius: '4px',
+                          // fontSize: '0.75rem',
+                          borderRadius:'50%',
+                          width: '5px',
+                          height: '5px',
                           pointerEvents: 'none',
                         }}
                       >
-                        {point.label}
+                        {/* <svg >
+                          <circle cx={point.x} cy={point.y} r={0.2} fill={getPointColor(point.label)} />
+                        </svg> */}
+                        {/* {point.x} */}
                       </div>
                     );
                     })}
