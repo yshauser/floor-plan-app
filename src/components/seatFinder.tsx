@@ -48,6 +48,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchValue((event.target.value).trim());
   };
+  const clearSearch = () => setSearchValue('');
 
   const selectEmployee = (employee: any) => {
     setSelectedEmployee(employee);
@@ -93,6 +94,17 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
               onChange={handleSearchChange}
               className="search-input"
             />
+            
+            {searchValue && (
+              <button
+              className="clear-search-button"
+              onClick={clearSearch}
+              aria-label="Clear search"
+              >
+              <X className="search-icon" />
+              </button>
+            )}
+
           </div>
 
           {selectedEmployee  && (

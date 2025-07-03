@@ -79,6 +79,8 @@
 .search-input-wrapper {
   position: relative; /* relative */
   margin-bottom: 1.5rem; /* mb-6 */
+  align-items: center;
+  width: 100%;
 }
 
 .search-icon-container {
@@ -116,6 +118,21 @@
   border-color: #3b82f6; /* focus:border-blue-500 */
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2); /* focus:ring-4 focus:ring-blue-500/20 */
 }
+
+.clear-search-button {
+  position: absolute;
+  right: 10px;
+  top:50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 
 /* Selected Employee Section */
 .selected-employee-container {

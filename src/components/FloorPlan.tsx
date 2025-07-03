@@ -13,39 +13,6 @@ interface FloorPlanProps {
   onClose?: () => void;
 }
 
-
-
-// function highlightSvgText(svg: string, query: string): string {
-//   if (!query) return svg;
-
-//   const regex = new RegExp(`(<tspan[^>]*>)([^<]*?)(${query})([^<]*?)(</tspan>)`, 'gi');
-//   return svg.replace(regex, (_, start, before, match, after, end) => {
-//     return `${start}${before}<tspan class="highlight">${match}</tspan>${after}${end}`;
-//   });
-// }
-
-// function highlightSvgText(svg: string, search: string, start: string, end: string): string {
-//   if (!svg) return svg;
-
-//   const highlight = (text: string, className: string) => {
-//     const regex = new RegExp(`(<tspan[^>]*>)([^<]*?)(${text})([^<]*?)(</tspan>)`, 'gi');
-//     return (input: string) =>
-//       input.replace(regex, (_, startTag, before, match, after, endTag) => {
-//         return `${startTag}${before}<tspan class="${className}">${match}</tspan>${after}${endTag}`;
-//       });
-//   };
-
-//   let modifiedSvg = svg;
-
-//   if (start) modifiedSvg = highlight(start, 'highlight-start')(modifiedSvg);
-//   if (end) modifiedSvg = highlight(end, 'highlight-end')(modifiedSvg);
-//   if (search && search !== end) modifiedSvg = highlight(search, 'highlight')(modifiedSvg);
-
-//   return modifiedSvg;
-// }
-
-
-
 // A* pathfinding algorithm
 // function heuristic(a: Point, b: Point): number {
 //   return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
@@ -163,24 +130,34 @@ interface FloorPlanProps {
 
 const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearchValue, onClose }) => {
   // const [startRoom, setStartRoom] = useState<string>('');
-  const [endRoom, setEndRoom] = useState<string>('');
+  const [targetRoom, setTargetRoom] = useState<string>('');
   const [showPoints, setShowPoints] = useState<boolean>(false);
-  // const [path, setPath] = useState<Point[]>([]);
-  // const svgRef = useRef<HTMLDivElement>(null);
-  console.log ('no svgcontent', svgContent);
+  const [startSize, setStartSize] = useState<number>(8);
+  const [targetSize, setTargetSize] = useState<number>(8);
+  const [startColor, setStartColor] = useState<string>('#000000'); // black
+  const [targetColor, setTargetColor] = useState<string>('#008000'); // green
+  
+
+
+  console.log ('no svgcontent', svgContent.length);
 
   const filteredPoints = points.filter(point => !point.label.startsWith('J'));
   const shouldShowPoint = (label: string) => {
-    return showPoints || label === searchValue || label === endRoom;
+    return showPoints || label === searchValue || label === targetRoom;
   };
   const getPointColor = (label: string) => {
-    if (label === searchValue) return 'blue';
-    if (label === endRoom) return 'green';
+    if (label === searchValue) return startColor;
+    if (label === targetRoom) return targetColor;
     return 'red';
   };
+  const getPointSize = (label:string) => {
+    if (label === searchValue) return startSize;
+    if (label === targetRoom) return targetSize;
+    return 8;
+  }
 
   // const findNavigation = () => {
-  //   if (!startRoom || !endRoom) {
+  //   if (!startRoom || !targetRoom) {
   //     alert('Please enter valid room numbers');
   //     return;
   //   }
@@ -191,7 +168,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
   // const clearPath = () => {
   //   setPath([]);
   //   setStartRoom('');
-  //   setEndRoom('');
+  //   setTargetRoom('');
   // };
 
   return (
@@ -214,8 +191,8 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
         </div>
         
         <div className="floor-plan-controls">
-          <div className="floor-plan-search-room">
-            <label className="floor-plan-label">Search Rooms</label>
+          <div className="floor-plan-room-input">
+            <label className="floor-plan-label">Start Room</label>
             <div className="floor-plan-input-wrapper">
               <Search className="floor-plan-search-icon" />
               <input
@@ -238,14 +215,14 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
             />
           </div> */}
           
-          <div className="floor-plan-end-room">
+          <div className="floor-plan-room-input">
             <label className="floor-plan-label">Target Room</label>
             <div className="floor-plan-input-wrapper">
             <input
               type="text"
               placeholder="e.g., 4N05"
-              value={endRoom}
-              onChange={(e) => setEndRoom(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+              value={targetRoom}
+              onChange={(e) => setTargetRoom(e.target.value.toUpperCase().replace(/\s+/g, ''))}
               className="floor-plan-input"
             />
             </div>
@@ -269,48 +246,73 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
           </div> */}
         </div>
         
-        {/* <div className="floor-plan-legend">
-          <div className="floor-plan-legend-rooms">
-            <p className="floor-plan-legend-title">Available Rooms:</p>
-            <p className="floor-plan-legend-text">4N01, 4N02, 4N03, 4N04, 4N05</p>
-          </div>
-          <div className="floor-plan-legend-items">
-            <p className="floor-plan-legend-title">Legend:</p>
-            <div className="floor-plan-legend-list">
-              <span className="floor-plan-legend-item">
-                <div className="floor-plan-legend-start-marker"></div>
-                Start
-              </span>
-              <span className="floor-plan-legend-item">
-                <div className="floor-plan-legend-end-marker"></div>
-                End
-              </span>
-              <span className="floor-plan-legend-item">
-                <div className="floor-plan-legend-path-marker"></div>
-                Path
-              </span>
+        <div className="floor-plan-legend">
+          <p className="floor-plan-legend-title">Legend:</p>
+          <div className="floor-plan-legend-list">
+            {/* Start */}
+            <div className="floor-plan-legend-item">
+              <label>Start</label>
+              <div className="floor-plan-legend-controls">
+                <input
+                  type="range"
+                  min={3}
+                  max={20}
+                  value={startSize}
+                  onChange={(e) => setStartSize(Number(e.target.value))}
+                />
+                <input
+                  type="color"
+                  value={startColor}
+                  onChange={(e) => setStartColor(e.target.value)}
+                  className="floor-plan-color-picker"
+                />
+              </div>
+            </div>
+
+            {/* Target */}
+            <div className="floor-plan-legend-item">
+              <label>Target</label>
+              <div className="floor-plan-legend-controls">
+                <input
+                  type="range"
+                  min={3}
+                  max={20}
+                  value={targetSize}
+                  onChange={(e) => setTargetSize(Number(e.target.value))}
+                />
+                <input
+                  type="color"
+                  value={targetColor}
+                  onChange={(e) => setTargetColor(e.target.value)}
+                  className="floor-plan-color-picker"
+                />
+              </div>
             </div>
           </div>
-        </div> */}
-        <button onClick={() => setShowPoints(!showPoints)}>
-          {showPoints ? 'Hide Points' : 'Show Points'}
-        </button>
-        <div >
+        </div>
+        
+        <div className="floor-plan-frame">
           <TransformWrapper
             initialScale={1}
             centerOnInit
+            limitToBounds={false}
             minScale={0.2}
             maxScale={10}
+            wheel={{ step: 50 }}
+            doubleClick={{ disabled: true }}
             >
-            {/* {({ zoomIn, zoomOut, resetTransform }) => (
+            {({ resetTransform }) => ( //zoomIn, zoomOut, 
               <>
-                <div className="tools" style={{ marginBottom: "5px"}}>
-                  <button onClick={()=>zoomIn}>Zoom In</button>
-                  <button onClick={()=>zoomOut}>Zoom Out</button>
-                  <button onClick={()=>resetTransform}>Reset</button>
-                </div> */}
+                {/* <div className="tools" style={{ marginBottom: "5px"}}> */}
+                  {/* <button onClick={()=>zoomIn}>Zoom In</button> */}
+                  {/* <button onClick={()=>zoomOut}>Zoom Out</button> */}
+                  <button className="fit-to-view-button" onClick={()=>resetTransform()}>Fit to view</button>
+                {/* </div> */}
+                <button onClick={() => setShowPoints(!showPoints)}>
+                  {showPoints ? 'Hide Points' : 'Show Points'}
+                </button>
                 <TransformComponent>
-                  <div style={{ position: 'relative', width: '100%', height: 'auto' }}>
+                  <div className="floor-plan-image-zommable-content">
                     <img
                       src="/floor-plan-app/FloorPlan.png"
                       alt="Floor Plan"
@@ -328,13 +330,9 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
                           top: `${point.y-0.5}%`,
                           transform: 'translate(-50%, -50%)',
                           backgroundColor: getPointColor(point.label),
-                          // color: 'white',
-                          // padding: '2px 4px',
-                          // borderRadius: '4px',
-                          // fontSize: '0.75rem',
                           borderRadius:'50%',
-                          width: '5px',
-                          height: '5px',
+                          width: `${getPointSize(point.label)}px`,
+                          height: `${getPointSize(point.label)}px`,
                           pointerEvents: 'none',
                         }}
                       >
@@ -345,22 +343,11 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
                       </div>
                     );
                     })}
-                  </div>
-
-
-                {/* <div
-                  ref={svgRef}
-                  dangerouslySetInnerHTML={{
-                    __html: highlightSvgText(svgContent, searchValue, startRoom, endRoom),
-                  }}
-                  className="floor-plan-svg"
-                  style={{ minHeight: '400px' }}
-                /> */}
-                
+                  </div>                
                 </TransformComponent>
 
-              {/* </>
-             )} */}
+              </>
+             )}
           </TransformWrapper>
         </div>
 
@@ -373,30 +360,13 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
               <div>
                 <h3 className="floor-plan-navigation-message-title">Navigation Route Found!</h3>
                 <p className="floor-plan-navigation-message-text">
-                  Path from {startRoom} to {endRoom} calculated successfully.
+                  Path from {startRoom} to {targetRoom} calculated successfully.
                 </p>
               </div>
             </div>
           </div>
         )} */}
       </div>
-
-      {/* <style>{`
-        .custom-scrollbar::-webkit-scrollbar {
-          width: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-          background: #f1f5f9;
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-          background: #cbd5e1;
-          border-radius: 3px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-          background: #94a3b8;
-        }
-      `}</style> */}
     </div>
   );
 };
