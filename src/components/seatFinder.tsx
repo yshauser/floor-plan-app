@@ -10,16 +10,20 @@ interface SeatFinderProps {
   onShowOnMap: (value: string) => void;
 }
 
+type SortBy = 'firstName' | 'lastName' | 'seat';
+type OrderBy = 'asc' | 'desc';
 
 const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const [searchValue, setSearchValue] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [selectedRoom, setSelectedRoom] = useState<MeetingRoom | null>(null);
+  const [sortBy, setSortBy] = useState<SortBy>('firstName');
+  const [orderBy, setOrderBy] = useState<OrderBy>('asc');
 
   const filteredEmployees = useMemo(() => {
     const trimmedQuery = searchValue.trim().toLowerCase();
     if (!trimmedQuery) return [];
-    return employeeList.filter((employee) => {
+    const filtered = employeeList.filter((employee) => {
       const firstName = employee.firstName.toLowerCase();
       const lastName = employee.lastName.toLowerCase();
       const seatNumber = employee.seatNumber.toLowerCase();
@@ -33,7 +37,33 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
         reverseFullName.includes(trimmedQuery)
       );
     });
-  }, [searchValue]);
+
+  return filtered.sort((a, b) => {
+      let valueA: string;
+      let valueB: string;
+
+      switch (sortBy) {
+        case 'firstName':
+          valueA = a.firstName.toLowerCase();
+          valueB = b.firstName.toLowerCase();
+          break;
+        case 'lastName':
+          valueA = a.lastName.toLowerCase();
+          valueB = b.lastName.toLowerCase();
+          break;
+        case 'seat':
+          valueA = a.seatNumber.toLowerCase();
+          valueB = b.seatNumber.toLowerCase();
+          break;
+        default:
+          valueA = a.firstName.toLowerCase();
+          valueB = b.firstName.toLowerCase();
+      }
+
+      const comparison = valueA.localeCompare(valueB);
+      return orderBy === 'asc' ? comparison : -comparison;
+    });
+  }, [searchValue, employeeList, sortBy, orderBy]);
 
   const filteredMeetingRooms = useMemo(() => {
     const trimmedQuery = searchValue.trim().toLowerCase();
@@ -66,6 +96,14 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
     setSelectedEmployee(null);
     setSelectedRoom(null);
     // Keep the search value to re-show the results
+  };
+
+  const handleSortByChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(event.target.value as SortBy);
+  };
+
+  const handleOrderByChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setOrderBy(event.target.value as OrderBy);
   };
 
   // Check if we should show search results
@@ -175,9 +213,39 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
 
           {shouldShowResults && (
             <div className="search-results-container">
+              <div className="search-results-header">
               <h4 className="search-results-title">
                 Search Results ({filteredEmployees.length + filteredMeetingRooms.length})
               </h4>
+                <div className="sorting-controls">
+                  <div className="sort-control">
+                    <label htmlFor="sort-by" className="sort-label">Sort by:</label>
+                    <select
+                      id="sort-by"
+                      value={sortBy}
+                      onChange={handleSortByChange}
+                      className="sort-select"
+                    >
+                      <option value="firstName">First Name</option>
+                      <option value="lastName">Last Name</option>
+                      <option value="seat">Seat</option>
+                    </select>
+                  </div>
+                  <div className="sort-control">
+                    <label htmlFor="order-by" className="sort-label">Order by:</label>
+                    <select
+                      id="order-by"
+                      value={orderBy}
+                      onChange={handleOrderByChange}
+                      className="sort-select"
+                    >
+                      <option value="asc">A to Z</option>
+                      <option value="desc">Z to A</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
               <div className="search-results-list">
                 {filteredEmployees.map((employee, index) => (
                   <div
