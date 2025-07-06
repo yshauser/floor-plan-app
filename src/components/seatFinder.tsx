@@ -7,7 +7,7 @@ import './seatFinder.css';
 interface SeatFinderProps {
   searchValue: string;
   setSearchValue: (value: string) => void;
-  onShowOnMap: (value: string) => void;
+  onShowOnMap: (valueSearch: string, valueLocation:string) => void;
 }
 
 type SortBy = 'firstName' | 'lastName' | 'seat';
@@ -19,6 +19,12 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const [selectedRoom, setSelectedRoom] = useState<MeetingRoom | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>('firstName');
   const [orderBy, setOrderBy] = useState<OrderBy>('asc');
+  const [myLocation, setMyLocation] = useState(() => {
+    return localStorage.getItem('myLocation') || '';
+  });
+  const [showMyLocation, setShowMyLocation] = useState(false);
+  const [showLocationInput, setShowLocationInput] = useState(false);
+  const [tempLocation, setTempLocation] = useState(myLocation);
 
   const filteredEmployees = useMemo(() => {
     const trimmedQuery = searchValue.trim().toLowerCase();
@@ -112,6 +118,40 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
     !selectedEmployee && 
     !selectedRoom;
 
+  const handleSetLocationClick= () => {
+    setTempLocation(myLocation);
+    setShowLocationInput(true);
+  }
+  const handleSaveLocation = () => {
+    setMyLocation(tempLocation);
+    localStorage.setItem('myLocation', tempLocation);
+    setShowLocationInput(false);
+    if (showMyLocation){ 
+      // push to FloorPlan if checkbox checked
+          console.log ('save',{searchValue,tempLocation},selectedEmployee, selectedRoom?.roomNumber);
+
+      if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,tempLocation)}
+      else if (selectedRoom?.roomNumber) {onShowOnMap(selectedRoom.roomNumber,tempLocation);}
+      else {onShowOnMap('',tempLocation);}
+    }
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setShowMyLocation(checked);
+    if (checked && myLocation !== '') {
+    // } else if (checked) {
+    console.log ('check',{searchValue,tempLocation}, selectedRoom?.roomNumber);
+      if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,myLocation)}
+      else if (selectedRoom?.roomNumber) {onShowOnMap(selectedRoom.roomNumber,myLocation);}
+      else {onShowOnMap('',myLocation);}
+    }else if (!checked){
+      setTempLocation('');
+    }
+  };
+
+
+
   return (
     <div className="seat-finder-container">
       <div className="seat-finder-content">
@@ -171,7 +211,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
               {selectedEmployee.floor === 4 && (
                 <button
                   className="map-toggle-button"
-                  onClick={() => onShowOnMap(selectedEmployee.seatNumber)}
+                  onClick={() => onShowOnMap(selectedEmployee.seatNumber, myLocation)}
                 >
                   Show on Map
                 </button>
@@ -203,7 +243,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
               {selectedRoom.floor === 4 && (
               <button
                 className="map-toggle-button"
-                onClick={() => onShowOnMap(selectedRoom.roomNumber)}
+                onClick={() => onShowOnMap(selectedRoom.roomNumber, myLocation)}
               >
                 Show on Map
               </button>
@@ -313,6 +353,31 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
               </div>
             </div>
           )}
+
+          <div className="my-location-controls" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+            <label>
+              <input
+                type="checkbox"
+                checked={showMyLocation}
+                onChange={handleCheckboxChange}
+              />
+              {' '}show my location ({myLocation})
+            </label>
+            <button className="set-location-button" onClick={handleSetLocationClick}>set my location</button>
+          </div>
+          {showLocationInput && (
+            <div className="my-location-input" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
+              <input
+                type="text"
+                value={tempLocation}
+                onChange={(e) => setTempLocation(e.target.value.toUpperCase().replace(/\s+/g, ''))} 
+                placeholder="Location not defined"
+                style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #ccc' }}
+              />
+              <button onClick={handleSaveLocation}>Save</button>
+            </div>
+          )}
+
 
           {searchValue.trim() &&
             filteredEmployees.length === 0 &&

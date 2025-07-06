@@ -7,9 +7,11 @@ import points from '../data/points.json'; // adjust path
 
 
 interface FloorPlanProps {
-  svgContent: string;
-  searchValue: string;
-  setSearchValue: (value: string) => void;
+  // svgContent: string;
+  targetRoom: string;  // search value from seat finder becomes target room in floor plan
+  setTargetRoom: (value: string) => void;
+  myLocation: string;
+  setMyLocation: (value: string) => void;
   onClose?: () => void;
 }
 
@@ -128,30 +130,29 @@ interface FloorPlanProps {
 //   return null; // No path found
 // }
 
-const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearchValue, onClose }) => {
+const FloorPlan: React.FC<FloorPlanProps> = ({ targetRoom, setTargetRoom, myLocation, setMyLocation, onClose }) => {
   // const [startRoom, setStartRoom] = useState<string>('');
-  const [targetRoom, setTargetRoom] = useState<string>('');
+  // const [targetRoom, setTargetRoom] = useState<string>('');
   const [showPoints, setShowPoints] = useState<boolean>(false);
+  // const [searchValue, setSearchValue] = useState<string>('');
   const [startSize, setStartSize] = useState<number>(8);
   const [targetSize, setTargetSize] = useState<number>(8);
-  const [startColor, setStartColor] = useState<string>('#000000'); // black
-  const [targetColor, setTargetColor] = useState<string>('#008000'); // green
+  const [targetColor, setTargetColor] = useState<string>('#000000'); // black
+  const [startColor, setStartColor] = useState<string>('#0000ff'); // blue
   
-
-
-  console.log ('no svgcontent', svgContent.length);
+console.log  ('target', {targetRoom})
 
   const filteredPoints = points.filter(point => !point.label.startsWith('J'));
   const shouldShowPoint = (label: string) => {
-    return showPoints || label === searchValue || label === targetRoom;
+    return showPoints || label === myLocation || label === targetRoom;
   };
   const getPointColor = (label: string) => {
-    if (label === searchValue) return startColor;
+    if (label === myLocation) return startColor;
     if (label === targetRoom) return targetColor;
     return 'red';
   };
   const getPointSize = (label:string) => {
-    if (label === searchValue) return startSize;
+    if (label === myLocation) return startSize;
     if (label === targetRoom) return targetSize;
     return 8;
   }
@@ -192,14 +193,29 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
         
         <div className="floor-plan-controls">
           <div className="floor-plan-room-input">
-            <label className="floor-plan-label">Start Room</label>
+            <label className="floor-plan-label">Target Room</label>
             <div className="floor-plan-input-wrapper">
               <Search className="floor-plan-search-icon" />
               <input
                 type="text"
                 placeholder="Search rooms..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value.toUpperCase().replace(/\s+/g, ''))}                className="floor-plan-input"
+                value={targetRoom}
+                onChange={(e) => setTargetRoom(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+                className="floor-plan-input"
+              />
+            </div>
+          </div>
+
+          <div className="floor-plan-room-input">
+            <label className="floor-plan-label">My Location</label>
+            <div className="floor-plan-input-wrapper">
+              {/* <Search className="floor-plan-search-icon" /> */}
+              <input
+                type="text"
+                placeholder="e.g., 4N05A"
+                value={myLocation}
+                onChange={(e) => setMyLocation(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+                className="floor-plan-input"
               />
             </div>
           </div>
@@ -214,20 +230,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
               className="floor-plan-input"
             />
           </div> */}
-          
-          <div className="floor-plan-room-input">
-            <label className="floor-plan-label">Target Room</label>
-            <div className="floor-plan-input-wrapper">
-            <input
-              type="text"
-              placeholder="e.g., 4N05"
-              value={targetRoom}
-              onChange={(e) => setTargetRoom(e.target.value.toUpperCase().replace(/\s+/g, ''))}
-              className="floor-plan-input"
-            />
-            </div>
-          </div>
-          
+                   
           {/* <div className="floor-plan-buttons">
             <button
               onClick={findNavigation}
@@ -247,28 +250,8 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
         </div>
         
         <div className="floor-plan-legend">
-          <p className="floor-plan-legend-title">Legend:</p>
+          {/* <p className="floor-plan-legend-title">Legend:</p> */}
           <div className="floor-plan-legend-list">
-            {/* Start */}
-            <div className="floor-plan-legend-item">
-              <label>Start</label>
-              <div className="floor-plan-legend-controls">
-                <input
-                  type="range"
-                  min={3}
-                  max={20}
-                  value={startSize}
-                  onChange={(e) => setStartSize(Number(e.target.value))}
-                />
-                <input
-                  type="color"
-                  value={startColor}
-                  onChange={(e) => setStartColor(e.target.value)}
-                  className="floor-plan-color-picker"
-                />
-              </div>
-            </div>
-
             {/* Target */}
             <div className="floor-plan-legend-item">
               <label>Target</label>
@@ -284,6 +267,26 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ svgContent, searchValue, setSearc
                   type="color"
                   value={targetColor}
                   onChange={(e) => setTargetColor(e.target.value)}
+                  className="floor-plan-color-picker"
+                />
+              </div>
+            </div>
+
+            {/* Start */}
+            <div className="floor-plan-legend-item">
+              <label>My location</label>
+              <div className="floor-plan-legend-controls">
+                <input
+                  type="range"
+                  min={3}
+                  max={20}
+                  value={startSize}
+                  onChange={(e) => setStartSize(Number(e.target.value))}
+                />
+                <input
+                  type="color"
+                  value={startColor}
+                  onChange={(e) => setStartColor(e.target.value)}
                   className="floor-plan-color-picker"
                 />
               </div>

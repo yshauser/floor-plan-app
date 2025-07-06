@@ -2,16 +2,19 @@ import React, { useState } from 'react';
 import FloorPlan from './components/FloorPlan';
 import SeatFinder from './components/seatFinder';
 import Header from './components/Header';
-import { svgContent } from './data/floorplan';
+// import { svgContent } from './data/floorplan';
 
 const App: React.FC = () => {
   const [showMap, setShowMap] = useState(false);
   const [searchValue, setSearchValue] = useState('');
+  const [myLocation, setMyLocation] = useState('');
 
   // const handleShowOnMap = (value: string) => {
   //   setSearchValue(value);
   //   setShowMap(true);
   // };
+
+  console.log ('app', {searchValue, myLocation})
 
   return (
     <>
@@ -21,17 +24,20 @@ const App: React.FC = () => {
       <SeatFinder
         searchValue={searchValue}
         setSearchValue={setSearchValue}
-        onShowOnMap={(value) => {
+        onShowOnMap={(value, value2) => {
           setSearchValue(value);
+          setMyLocation(value2);
           setShowMap(true);
         }}
       />
 
       {showMap && (
         <FloorPlan
-          svgContent={svgContent}
-          searchValue={searchValue.trim()}
-          setSearchValue={setSearchValue}
+          // svgContent={svgContent}
+          targetRoom={searchValue.trim()}
+          setTargetRoom={setSearchValue}
+          myLocation={myLocation.trim()}
+          setMyLocation={setMyLocation}
           onClose={()=>{
             console.log('Floor plan closed');
             setShowMap(false);
