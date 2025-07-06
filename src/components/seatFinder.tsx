@@ -128,8 +128,6 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
     setShowLocationInput(false);
     if (showMyLocation){ 
       // push to FloorPlan if checkbox checked
-          console.log ('save',{searchValue,tempLocation},selectedEmployee, selectedRoom?.roomNumber);
-
       if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,tempLocation)}
       else if (selectedRoom?.roomNumber) {onShowOnMap(selectedRoom.roomNumber,tempLocation);}
       else {onShowOnMap('',tempLocation);}
@@ -140,8 +138,6 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
     const checked = e.target.checked;
     setShowMyLocation(checked);
     if (checked && myLocation !== '') {
-    // } else if (checked) {
-    console.log ('check',{searchValue,tempLocation}, selectedRoom?.roomNumber);
       if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,myLocation)}
       else if (selectedRoom?.roomNumber) {onShowOnMap(selectedRoom.roomNumber,myLocation);}
       else {onShowOnMap('',myLocation);}
@@ -149,6 +145,15 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
       setTempLocation('');
     }
   };
+
+  const handleShowOnMap = () => {
+  console.log ('show on map',{searchValue,myLocation}, selectedRoom?.roomNumber);
+    let location = '';
+    if (showMyLocation) {location = myLocation}
+    if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,location)}
+    else if (selectedRoom?.roomNumber) {onShowOnMap(selectedRoom.roomNumber,location);}
+    else {onShowOnMap('',location);}
+  }
 
 
 
@@ -211,7 +216,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
               {selectedEmployee.floor === 4 && (
                 <button
                   className="map-toggle-button"
-                  onClick={() => onShowOnMap(selectedEmployee.seatNumber, myLocation)}
+                  onClick={handleShowOnMap}
                 >
                   Show on Map
                 </button>
@@ -243,7 +248,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
               {selectedRoom.floor === 4 && (
               <button
                 className="map-toggle-button"
-                onClick={() => onShowOnMap(selectedRoom.roomNumber, myLocation)}
+                onClick={handleShowOnMap}
               >
                 Show on Map
               </button>
