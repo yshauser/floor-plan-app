@@ -8,8 +8,8 @@ const App: React.FC = () => {
   const [showMap, setShowMap] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [myLocation, setMyLocation] = useState('');
-  const [targetColor, setTargetColor] = useState('');
-  const [startColor, setStartColor] = useState('');
+  const [targetColor, setTargetColor] = useState(()=> {return localStorage.getItem('floorplan-target-color') || '#000000'; });//black
+  const [startColor, setStartColor] = useState(()=> {return localStorage.getItem('floorplan-start-color')|| '#0000ff'});//blue
 
   // console.log ('app', {searchValue, myLocation, startColor, targetColor})
 

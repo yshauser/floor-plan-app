@@ -23,20 +23,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ targetRoom, setTargetRoom, myLoca
   const [startSize, setStartSize] = useState<number>(8);
   const [targetSize, setTargetSize] = useState<number>(8);
 
-  
-  // Load colors from localStorage on component mount
-  useEffect(() => {
-    const savedStartColor = localStorage.getItem('floorplan-start-color');
-    const savedTargetColor = localStorage.getItem('floorplan-target-color');    
-    if (savedStartColor) {
-      setStartColor(savedStartColor);
-    }
-    if (savedTargetColor) {
-      setTargetColor(savedTargetColor);
-    }
-  }, [setStartColor, setTargetColor]);
-
-    // Save colors to localStorage whenever they change
+  // Save colors to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('floorplan-start-color', startColor);
   }, [startColor]);
