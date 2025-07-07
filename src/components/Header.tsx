@@ -4,8 +4,11 @@ import React, {useState, useRef, useEffect} from 'react';
 import './Header.css';
 import packageJson from '../../package.json'; // Adjust path as needed
 
-
-const Header: React.FC = () => {
+interface HeaderProps {
+  setStartColor?: (value: string) => void;
+  setTargetColor?: (value: string) => void;
+}
+const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor}) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
 
@@ -23,6 +26,21 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleRestoreDefaults = () => {
+    // Clear localStorage
+    localStorage.removeItem('floorplan-start-color');
+    localStorage.removeItem('floorplan-target-color');
+    
+    // Reset values to defaults
+    if (setStartColor) setStartColor('#0000ff'); // blue
+    if (setTargetColor) setTargetColor('#000000'); // black
+    
+    // Close menu
+    setMenuOpen(false);
+    
+    // Optional: Show confirmation or feedback
+    // alert('Settings restored to defaults');
+  };
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -40,6 +58,9 @@ const Header: React.FC = () => {
           </button>
           {isMenuOpen && (
             <div className="menu-dropdown">
+              <div onClick={handleRestoreDefaults}>
+                Restore Default Colors
+              </div>
               <div onClick={() => { setShowAbout(true); setMenuOpen(false); }}>
                 about
               </div>

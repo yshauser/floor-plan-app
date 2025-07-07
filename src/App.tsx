@@ -8,19 +8,18 @@ const App: React.FC = () => {
   const [showMap, setShowMap] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [myLocation, setMyLocation] = useState('');
+  const [targetColor, setTargetColor] = useState('');
+  const [startColor, setStartColor] = useState('');
 
-  // const handleShowOnMap = (value: string) => {
-  //   setSearchValue(value);
-  //   setShowMap(true);
-  // };
-
-  console.log ('app', {searchValue, myLocation})
+  // console.log ('app', {searchValue, myLocation, startColor, targetColor})
 
   return (
     <>
-      <Header />
+      <Header 
+        setStartColor={setStartColor}  
+        setTargetColor={setTargetColor}
+      />
       {/* <SeatFinder onShowOnMap={handleShowOnMap} /> */}
-      {/* {showMap && <FloorPlan svgContent={svgContent} initialSearch={searchValue} />} */}
       <SeatFinder
         searchValue={searchValue}
         setSearchValue={setSearchValue}
@@ -33,11 +32,14 @@ const App: React.FC = () => {
 
       {showMap && (
         <FloorPlan
-          // svgContent={svgContent}
           targetRoom={searchValue.trim()}
           setTargetRoom={setSearchValue}
           myLocation={myLocation.trim()}
           setMyLocation={setMyLocation}
+          startColor={startColor}
+          setStartColor={setStartColor}
+          targetColor={targetColor}
+          setTargetColor={setTargetColor}
           onClose={()=>{
             console.log('Floor plan closed');
             setShowMap(false);

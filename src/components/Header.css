@@ -4,7 +4,7 @@
   align-items: center;
   /* justify-content: space-between; */
   padding: 12px 16px;
-  background: linear-gradient(to right, #4a6fa5, #3a5683);
+  background: linear-gradient(to right, #fd0083, #7d00b9);
   color: white;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: sticky;
@@ -76,6 +76,7 @@ min-width: 120px;
 padding: 10px 14px;
 cursor: pointer;
 text-align: start; /* Align text based on direction */
+width: max-content; /* expand box to have text of option in one line*/
 }
 
 .menu-dropdown div:hover {

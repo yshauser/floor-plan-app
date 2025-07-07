@@ -380,25 +380,27 @@
 }
 
 .map-toggle-button.show-map {
-  background-image: linear-gradient(to right, #ef4444, #ec4899); /* bg-gradient-to-r from-red-500 to-pink-500 */
+  background-image: linear-gradient(to right, #fd0083, #7d00b9);
 }
 
 .map-toggle-button.show-map:hover {
-  background-image: linear-gradient(to right, #dc2626, #d946ef); /* hover:from-red-600 hover:to-pink-600 */
+  background-image: linear-gradient(to right, #e60074, #6500a6); /* slightly darker hover */
 }
 
 .map-toggle-button:not(.show-map) {
-  background-image: linear-gradient(to right, #3b82f6, #6366f1); /* bg-gradient-to-r from-blue-500 to-indigo-600 */
+  background-image: linear-gradient(to right, #fd0083, #7d00b9);
 }
 
 .map-toggle-button:not(.show-map):hover {
-  background-image: linear-gradient(to right, #2563eb, #4f46e5); /* hover:from-blue-600 hover:to-indigo-700 */
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1); /* hover:shadow-xl */
+  background-image: linear-gradient(to right, #e60074, #6500a6);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 
+              0 8px 10px -6px rgba(0, 0, 0, 0.1);
 }
+
 .map-toggle-button {
   margin-top: 1rem;
   padding: 0.75rem 1.5rem;
-  background-color: #2563eb;
+  background-color: #fd0083; /* fallback */
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -407,8 +409,9 @@
 }
 
 .map-toggle-button:hover {
-  background-color: #1d4ed8;
+  background-color: #e60074;
 }
+
 
 .search-results-header {
   display: flex;
@@ -479,7 +482,7 @@
 
 .my-location-input button {
   padding: 0.5rem 1rem;
-  background-color: #3b82f6;
+  background-color: #7d00b9;
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -489,7 +492,7 @@
 }
 
 .my-location-input button:hover {
-  background-color: #2563eb;
+  background-color: #fd0083;
 }
 
 .set-location-button{   
