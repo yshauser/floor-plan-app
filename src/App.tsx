@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import FloorPlan from './components/FloorPlan';
 import SeatFinder from './components/seatFinder';
 import Header from './components/Header';
@@ -10,8 +10,14 @@ const App: React.FC = () => {
   const [myLocation, setMyLocation] = useState('');
   const [targetColor, setTargetColor] = useState(()=> {return localStorage.getItem('floorplan-target-color') || '#000000'; });//black
   const [startColor, setStartColor] = useState(()=> {return localStorage.getItem('floorplan-start-color')|| '#0000ff'});//blue
+  const floorPlanRef = useRef<HTMLDivElement | null>(null);
 
   // console.log ('app', {searchValue, myLocation, startColor, targetColor})
+  useEffect(() => {
+    if (showMap && floorPlanRef.current) {
+      floorPlanRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [showMap]);
 
   return (
     <>
@@ -31,20 +37,22 @@ const App: React.FC = () => {
       />
 
       {showMap && (
-        <FloorPlan
-          targetRoom={searchValue.trim()}
-          setTargetRoom={setSearchValue}
-          myLocation={myLocation.trim()}
-          setMyLocation={setMyLocation}
-          startColor={startColor}
-          setStartColor={setStartColor}
-          targetColor={targetColor}
-          setTargetColor={setTargetColor}
-          onClose={()=>{
-            console.log('Floor plan closed');
-            setShowMap(false);
-          }}
-        />
+        <div ref={floorPlanRef}>
+          <FloorPlan
+            targetRoom={searchValue.trim()}
+            setTargetRoom={setSearchValue}
+            myLocation={myLocation.trim()}
+            setMyLocation={setMyLocation}
+            startColor={startColor}
+            setStartColor={setStartColor}
+            targetColor={targetColor}
+            setTargetColor={setTargetColor}
+            onClose={()=>{
+              console.log('Floor plan closed');
+              setShowMap(false);
+            }}
+          />
+        </div>
       )}
     </>
   );
