@@ -3,7 +3,8 @@ import type { Point } from '../data/floorplan';
 import { Search, Navigation, X } from 'lucide-react'; 
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import './FloorPlan.css';
-import points from '../data/points.json'; 
+import points_4 from '../data/points_4.json'; 
+import points_3 from '../data/points_3.json'; 
 
 
 interface FloorPlanProps {
@@ -34,7 +35,24 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ targetRoom, setTargetRoom, myLoca
 
   // console.log  ('target', {targetRoom})
 
-  const filteredPoints = points.filter(point => !point.label.startsWith('J'));
+function getFirstChar(targetRoom?: string, myLocation?: string){
+  const firstChar = targetRoom?.charAt(0) || myLocation?.charAt(0);
+  return firstChar
+}
+
+
+function getFilteredPoints(): Point[] {
+  const sourcePoints = firstChar === '3' ? points_3 : points_4;
+  return sourcePoints.filter(point => !point.label.startsWith('J'));
+}
+
+  const firstChar = getFirstChar(targetRoom, myLocation)
+  const filteredPoints = getFilteredPoints();
+  const floorPlanSrc = firstChar === '3' 
+    ? '/floor-plan-app/FloorPlan_3_clear.png' // ? '/floor-plan-app/FloorPlan_3.png' replace with this for image with colored meeting rooms
+    : '/floor-plan-app/FloorPlan_4.png';
+
+
   const shouldShowPoint = (label: string) => {
     return showPoints || label === myLocation || label === targetRoom;
   };
@@ -164,7 +182,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({ targetRoom, setTargetRoom, myLoca
                 <TransformComponent>
                   <div className="floor-plan-image-zommable-content">
                     <img
-                      src="/floor-plan-app/FloorPlan.png"
+                      src={floorPlanSrc}
                       alt="Floor Plan"
                       className="floor-plan-image"
                       style={{ width: '100%', height: 'auto', objectFit: 'contain' }}

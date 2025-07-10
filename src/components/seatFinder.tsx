@@ -213,7 +213,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
                   <X className="selected-employee-close-icon" />
                 </button>
               </div>
-              {selectedEmployee.floor === 4 && (
+              {(selectedEmployee.floor === 4 || selectedEmployee.floor === 3) && (
                 <button
                   className="map-toggle-button"
                   onClick={handleShowOnMap}
@@ -245,7 +245,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
                   <X className="selected-employee-close-icon" />
                 </button>
               </div>
-              {selectedRoom.floor === 4 && (
+              {(selectedRoom.floor === 4 || selectedRoom.floor === 3 ) && (
               <button
                 className="map-toggle-button"
                 onClick={handleShowOnMap}
@@ -360,6 +360,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
           )}
 
           <div className="my-location-controls" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+            {myLocation!== ''&& (
             <label>
               <input
                 type="checkbox"
@@ -368,7 +369,13 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
               />
               {' '}show my location ({myLocation})
             </label>
-            <button className="set-location-button" onClick={handleSetLocationClick}>set my location</button>
+            )}
+            <button className="set-location-button" 
+              onClick={handleSetLocationClick}
+              disabled={showLocationInput}
+              >
+              {myLocation === '' ? 'set my location' : 'edit my location'}
+            </button>
           </div>
           {showLocationInput && (
             <div className="my-location-input" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
