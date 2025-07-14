@@ -213,7 +213,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
                   <X className="selected-employee-close-icon" />
                 </button>
               </div>
-              {(selectedEmployee.floor === 4 || selectedEmployee.floor === 3) && (
+              {(selectedEmployee.floor === 4 || selectedEmployee.floor === 3 || selectedEmployee.floor === 2 || selectedEmployee.floor === 1) && (
                 <button
                   className="map-toggle-button"
                   onClick={handleShowOnMap}
@@ -245,7 +245,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
                   <X className="selected-employee-close-icon" />
                 </button>
               </div>
-              {(selectedRoom.floor === 4 || selectedRoom.floor === 3 ) && (
+              {(selectedRoom.floor === 4 || selectedRoom.floor === 3 || selectedRoom.floor === 2 || selectedRoom.floor === 1) && (
               <button
                 className="map-toggle-button"
                 onClick={handleShowOnMap}

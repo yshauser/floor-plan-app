@@ -5,6 +5,8 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import './FloorPlan.css';
 import points_4 from '../data/points_4.json'; 
 import points_3 from '../data/points_3.json'; 
+import points_2 from '../data/points_2.json'; 
+import points_1 from '../data/points_1.json'; 
 
 
 interface FloorPlanProps {
@@ -42,16 +44,42 @@ function getFirstChar(targetRoom?: string, myLocation?: string){
 
 
 function getFilteredPoints(): Point[] {
-  const sourcePoints = firstChar === '3' ? points_3 : points_4;
-  return sourcePoints.filter(point => !point.label.startsWith('J'));
+  let sourcePoints: Point[];
+  switch (firstChar){
+    case '1':
+      sourcePoints = points_1;
+      break;
+    case '2':
+      sourcePoints = points_2;
+      break;
+    case '3':
+      sourcePoints = points_3;
+      break;
+    case '4':
+      sourcePoints = points_4;
+      break;
+    default:
+      sourcePoints = [];
+  }
+    return sourcePoints.filter(point => !point.label.startsWith('J'));
 }
 
   const firstChar = getFirstChar(targetRoom, myLocation)
   const filteredPoints = getFilteredPoints();
-  const floorPlanSrc = firstChar === '3' 
-    ? '/floor-plan-app/FloorPlan_3_clear.png' // ? '/floor-plan-app/FloorPlan_3.png' replace with this for image with colored meeting rooms
-    : '/floor-plan-app/FloorPlan_4.png';
-
+  const floorPlanSrc = (() => {
+    switch (firstChar) {
+      case '1':
+        return '/floor-plan-app/FloorPlan_1_clear.png' // '/floor-plan-app/FloorPlan_1.png' replace with this for image with colored meeting rooms
+      case '2':
+        return '/floor-plan-app/FloorPlan_2_clear.png' // '/floor-plan-app/FloorPlan_2.png' replace with this for image with colored meeting rooms
+      case '3':
+        return '/floor-plan-app/FloorPlan_3_clear.png' // '/floor-plan-app/FloorPlan_3.png' replace with this for image with colored meeting rooms
+      case '4':
+        return '/floor-plan-app/FloorPlan_4.png'
+      default:
+        return '';
+    }
+  })();
 
   const shouldShowPoint = (label: string) => {
     return showPoints || label === myLocation || label === targetRoom;
