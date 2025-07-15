@@ -62,7 +62,7 @@ const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor}) => {
                 Restore Default Colors
               </div>
               <div onClick={() => { setShowAbout(true); setMenuOpen(false); }}>
-                about
+                About
               </div>
             </div>
           )}
