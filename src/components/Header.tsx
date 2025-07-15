@@ -7,8 +7,10 @@ import packageJson from '../../package.json'; // Adjust path as needed
 interface HeaderProps {
   setStartColor?: (value: string) => void;
   setTargetColor?: (value: string) => void;
+  showNavigation: boolean;
+  setShowNavigation: (value: boolean) => void;
 }
-const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor}) => {
+const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation, setShowNavigation}) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
 
@@ -63,6 +65,9 @@ const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor}) => {
               </div>
               <div onClick={() => { setShowAbout(true); setMenuOpen(false); }}>
                 About
+              </div>
+              <div onClick={() => { setShowNavigation(!showNavigation); setMenuOpen(false); }}>
+                {showNavigation ? 'Hide Navigation' : 'Show Navigation'}
               </div>
             </div>
           )}

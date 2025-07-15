@@ -10,6 +10,7 @@ import points_1 from '../data/points_1.json';
 import { findPath, PathRenderer, usePathfinding } from './pathfinding'; // Import pathfinding functions
 
 interface FloorPlanProps {
+  showNavigation: boolean;
   targetRoom: string;
   setTargetRoom: (value: string) => void;
   myLocation: string;
@@ -22,7 +23,8 @@ interface FloorPlanProps {
 }
 
 const FloorPlan: React.FC<FloorPlanProps> = ({ 
-  targetRoom, 
+  showNavigation,
+  targetRoom,
   setTargetRoom, 
   myLocation, 
   setMyLocation, 
@@ -38,7 +40,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   const [showPath, setShowPath] = useState<boolean>(false);
   const [pathColor, setPathColor] = useState<string>('#ff0000');
   const [pathWidth, setPathWidth] = useState<number>(2);
-  const [showArrows, setShowArrows] = useState<boolean>(true);
+  const [showArrows, setShowArrows] = useState<boolean>(false);
 
   // Save colors to localStorage whenever they change
   useEffect(() => {
@@ -54,26 +56,6 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     return firstChar
   }
 
-  // function getFilteredPoints(): Point[] {
-  //   let sourcePoints: Point[];
-  //   switch (firstChar){
-  //     case '1':
-  //       sourcePoints = points_1;
-  //       break;
-  //     case '2':
-  //       sourcePoints = points_2;
-  //       break;
-  //     case '3':
-  //       sourcePoints = points_3;
-  //       break;
-  //     case '4':
-  //       sourcePoints = points_4;
-  //       break;
-  //     default:
-  //       sourcePoints = [];
-  //   }
-  //   return sourcePoints.filter(point => (!point.label.startsWith('J')&&!point.label.startsWith('B')));
-  // }
 const pointsMap: Record<string, Point[]> = {
   '1': points_1,
   '2': points_2,
@@ -84,16 +66,13 @@ const pointsMap: Record<string, Point[]> = {
   const selectedPoints = pointsMap[firstChar as keyof typeof pointsMap] ?? [];
 
   const filteredPoints = selectedPoints.filter(point => (!point.label.startsWith('J')&&!point.label.startsWith('B')));
-
   const junctions = selectedPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
-  // const junctions = points_4.filter(point => (point.label.startsWith('J')||point.label.startsWith('B')));
   const { currentPath, isPathfinding, findAndSetPath, clearPath } = usePathfinding(junctions);
 
-  console.log('Debug - currentPath:', currentPath);
-  console.log('Debug - myLocation:', myLocation);
-  console.log('Debug - targetRoom:', targetRoom);
-  console.log('Debug - junctions count:', junctions.length);
-
+  // console.log('Debug - currentPath:', currentPath);
+  // console.log('Debug - myLocation:', myLocation);
+  // console.log('Debug - targetRoom:', targetRoom);
+  // console.log('Debug - junctions count:', junctions.length);
 
   
   const floorPlanSrc = (() => {
@@ -146,14 +125,14 @@ const pointsMap: Record<string, Point[]> = {
       }
     });
 
-    console.log('Debug - findNearestJunction for', roomLabel, ':', nearestJunction);
+    // console.log('Debug - findNearestJunction for', roomLabel, ':', nearestJunction);
     return nearestJunction;
   }, [filteredPoints, junctions]);
 
   const handleFindPath = React.useCallback(() => {
-    console.log('Debug - handleFindPath called');
+    // console.log('Debug - handleFindPath called');
     if (!myLocation || !targetRoom) {
-      console.log('Debug - Missing locations:', { myLocation, targetRoom });
+      // console.log('Debug - Missing locations:', { myLocation, targetRoom });
       return;
     }
 
@@ -161,19 +140,19 @@ const pointsMap: Record<string, Point[]> = {
     const startJunction = findNearestJunction(myLocation);
     const targetJunction = findNearestJunction(targetRoom);
 
-    console.log('Debug - Found junctions:', { startJunction, targetJunction });
+    // console.log('Debug - Found junctions:', { startJunction, targetJunction });
 
     if (!startJunction || !targetJunction) {
-      console.log('Debug - Could not find junctions');
+      // console.log('Debug - Could not find junctions');
       return;
     }
 
     if (startJunction === targetJunction) {
-      console.log('Debug - Same junction');
+      // console.log('Debug - Same junction');
       return;
     }
 
-    console.log('Debug - Calling findAndSetPath');
+    // console.log('Debug - Calling findAndSetPath');
     findAndSetPath(startJunction, targetJunction, myLocation, targetRoom);
     setShowPath(true);
   }, [myLocation, targetRoom, findNearestJunction, findAndSetPath]);
@@ -242,26 +221,28 @@ const pointsMap: Record<string, Point[]> = {
           </div>
 
           {/* Pathfinding controls */}
-          <div className="floor-plan-pathfinding-controls">
-            <button 
-              onClick={handleFindPath}
-              disabled={isPathfinding || !myLocation || !targetRoom}
-              className="floor-plan-path-button"
-            >
-              <Route size={16} />
-              {isPathfinding ? 'Finding Path...' : 'Find Path'}
-            </button>
-            
-            {currentPath && (
-              <button 
-                onClick={handleClearPath}
-                className="floor-plan-clear-button"
+          {showNavigation && (
+            <div className="floor-plan-pathfinding-controls">
+              <button
+                onClick={handleFindPath}
+                disabled={isPathfinding || !myLocation || !targetRoom}
+                className="floor-plan-path-button"
               >
-                <RotateCcw size={16} />
-                Clear Path
+                <Route size={16} />
+                {isPathfinding ? 'Finding Path...' : 'Find Path'}
               </button>
-            )}
-          </div>
+              
+              {currentPath && (
+                <button
+                  onClick={handleClearPath}
+                  className="floor-plan-clear-button"
+                >
+                  <RotateCcw size={16} />
+                  Clear Path
+                </button>
+              )}
+            </div>
+          )}
         </div>
         
         <div className="floor-plan-legend">
@@ -307,7 +288,7 @@ const pointsMap: Record<string, Point[]> = {
             </div>
 
             {/* Path styling */}
-            {showPath && currentPath && (
+            {showNavigation && showPath && currentPath && (
               <div className="floor-plan-legend-item">
                 <label>Path</label>
                 <div className="floor-plan-legend-controls">
@@ -339,7 +320,7 @@ const pointsMap: Record<string, Point[]> = {
         </div>
 
         {/* Path information */}
-        {currentPath && (
+        {showNavigation && currentPath && (
           <div className="floor-plan-path-info">
             <p>Path found: {currentPath.path.length} junctions</p>
             <p>Route: {currentPath.path.join(' → ')}</p>
@@ -375,7 +356,7 @@ const pointsMap: Record<string, Point[]> = {
                     />
                     
                     {/* Render path */}
-                    {showPath && currentPath && (
+                    {showNavigation && showPath && currentPath && (
                       <PathRenderer
                         segments={currentPath.segments}
                         pathColor={pathColor}

@@ -49,13 +49,6 @@ export function findPath(
   const previous = new Map<string, string | null>();
   const unvisited = new Set<string>();
 
-  // Initialize distances
-  // Object.keys(connections).forEach(junction => {
-  //   distances.set(junction, junction === startLabel ? 0 : Infinity);
-  //   previous.set(junction, null);
-  //   unvisited.add(junction);
-  // });
-
 const allJunctions = new Set<string>();
 
 // Add all keys and all values (neighbors)
@@ -63,17 +56,15 @@ Object.entries(connections).forEach(([junction, neighbors]) => {
   allJunctions.add(junction);
   neighbors.forEach(n => allJunctions.add(n));
 });
-console.log ('CONEECTIONS', {connections, allJunctions})
+// console.log ('Basic PF data', {connections, allJunctions})
 
 allJunctions.forEach(junction => {
-  console.log ("JUNC", {junction, startLabel})
   distances.set(junction, junction === startLabel ? 0 : Infinity);
   previous.set(junction, null);
   unvisited.add(junction);
-  console.log ("info", {distances, previous, unvisited})
 });
-console.log('Initial distances:', Object.fromEntries(distances));
-console.log('Initial unvisited:', Array.from(unvisited));
+// console.log('Initial distances:', Object.fromEntries(distances));
+// console.log('Initial unvisited:', Array.from(unvisited));
   
   while (unvisited.size > 0) {
     // Find unvisited node with minimum distance
@@ -91,7 +82,6 @@ console.log('Initial unvisited:', Array.from(unvisited));
       }
     }
     
-    console.log ('CURRENT', {current} )
     if (!current || minDistance === Infinity) {
       break; // No path found
     }
@@ -102,7 +92,6 @@ console.log('Initial unvisited:', Array.from(unvisited));
 
     // If we reached the target, we can stop
     if (current === targetLabel) {
-      console.log ('TARGET REACHED')
       break;
     }
 
@@ -266,20 +255,16 @@ export function usePathfinding(junctionPoints: Point[]) {
   const findAndSetPath = React.useCallback((startLabel: string, targetLabel: string, startFloor: string, targetFloor: string) => {
     setIsPathfinding(true);
     let junctions: Record<string, string[]>;
-    console.log (startLabel, targetLabel, startLabel.charAt(0))
       if (startFloor.startsWith('4') && targetFloor.startsWith('4')) {
         junctions = junctions_4;
-        console.log ('FLOOR4')
       } else if (startFloor.startsWith('3') && targetFloor.startsWith('3')) {
         junctions = junctions_3;
-        console.log ('FLOOR3')
       } else {
-        console.log ('NO FLOOR')
         junctions = {};
       }
     try {
       const result = findPath(startLabel, targetLabel, junctionPoints, junctions);
-        console.log('Path result:', result); 
+        // console.log('Path result:', result); 
       setCurrentPath(result);
     } catch (error) {
       console.error('Pathfinding error:', error);
