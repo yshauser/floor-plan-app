@@ -7,7 +7,7 @@ import points_4 from '../data/points_4.json';
 import points_3 from '../data/points_3.json'; 
 import points_2 from '../data/points_2.json'; 
 import points_1 from '../data/points_1.json'; 
-import { findPath, PathRenderer, usePathfinding } from './pathfinding'; // Import pathfinding functions
+import { PathRenderer, usePathfinding } from './pathfinding'; // Import pathfinding functions
 
 interface FloorPlanProps {
   showNavigation: boolean;
