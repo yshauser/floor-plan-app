@@ -270,22 +270,48 @@ export const PathRenderer: React.FC<{
       })}
 
       {/* Start Point Arrow */}
-      {showArrows && startPoint && segments.length > 0 && (
-        <Arrow
-          point={startPoint}
-          angle={Math.atan2(segments[0].from.y - startPoint.y, segments[0].from.x - startPoint.x)}
-          color={arrowColor}
-        />
-      )}
+{/* Start Rectangle */}
+{showArrows && startPoint && segments.length > 0 && (
+  <div
+    style={{
+      position: 'absolute',
+      left: `${startPoint.x}%`,
+      top: `${startPoint.y}%`,
+      width: '8px',
+      height: '8px',
+      backgroundColor: arrowColor,
+      transform: `translate(-50%, -50%) rotate(${Math.atan2(
+        segments[0].from.y - startPoint.y,
+        segments[0].from.x - startPoint.x
+      )}rad)`,
+      transformOrigin: 'center',
+      pointerEvents: 'none',
+      zIndex: 1001
+    }}
+  />
+)}
 
-      {/* End Point Arrow */}
-      {showArrows && endPoint && segments.length > 0 && (
-        <Arrow
-          point={endPoint}
-          angle={Math.atan2(endPoint.y - segments[segments.length - 1].to.y, endPoint.x - segments[segments.length - 1].to.x)}
-          color={arrowColor}
-        />
-      )}
+{/* End Rectangle */}
+{showArrows && endPoint && segments.length > 0 && (
+  <div
+    style={{
+      position: 'absolute',
+      left: `${endPoint.x}%`,
+      top: `${endPoint.y}%`,
+      width: '8px',
+      height: '8px',
+      backgroundColor: arrowColor,
+      transform: `translate(-50%, -50%) rotate(${Math.atan2(
+        endPoint.y - segments[segments.length - 1].to.y,
+        endPoint.x - segments[segments.length - 1].to.x
+      )}rad)`,
+      transformOrigin: 'center',
+      pointerEvents: 'none',
+      zIndex: 1001
+    }}
+  />
+)}
+
     </>
   );
 };

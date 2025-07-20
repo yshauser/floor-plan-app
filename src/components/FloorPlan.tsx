@@ -161,6 +161,8 @@ const pointsMap: Record<string, Point[]> = {
     clearPath();
     setShowPath(false);
   }, [clearPath]);
+  console.log (currentPath?.path.length," junctions");
+  console.log ("Route: ",currentPath?.path.join(' → '));
 
   // Auto-find path when both locations are set
   // useEffect(() => {
@@ -320,12 +322,12 @@ const pointsMap: Record<string, Point[]> = {
         </div>
 
         {/* Path information */}
-        {showNavigation && currentPath && (
+        {/* {showNavigation && currentPath && (
           <div className="floor-plan-path-info">
             <p>Path found: {currentPath.path.length} junctions</p>
             <p>Route: {currentPath.path.join(' → ')}</p>
           </div>
-        )}
+        )} */}
         
         <div className="floor-plan-frame">
           <TransformWrapper
@@ -364,6 +366,8 @@ const pointsMap: Record<string, Point[]> = {
                         showArrows={true}
                         showLine={showPathLine}
                         arrowColor={pathColor}
+                        startPoint={currentPath.segments[0].from}
+                        endPoint={currentPath.segments[currentPath.segments.length - 1].to}
                       />
                     )}
                     
