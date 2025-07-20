@@ -40,7 +40,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   const [showPath, setShowPath] = useState<boolean>(false);
   const [pathColor, setPathColor] = useState<string>('#ff0000');
   const [pathWidth, setPathWidth] = useState<number>(2);
-  const [showArrows, setShowArrows] = useState<boolean>(false);
+  const [showPathLine, setShowPathLine] = useState<boolean>(false);
 
   // Save colors to localStorage whenever they change
   useEffect(() => {
@@ -153,7 +153,7 @@ const pointsMap: Record<string, Point[]> = {
     }
 
     // console.log('Debug - Calling findAndSetPath');
-    findAndSetPath(startJunction, targetJunction, myLocation, targetRoom);
+    findAndSetPath(targetJunction,startJunction, targetRoom,myLocation);
     setShowPath(true);
   }, [myLocation, targetRoom, findNearestJunction, findAndSetPath]);
 
@@ -308,10 +308,10 @@ const pointsMap: Record<string, Point[]> = {
                   <label className="floor-plan-checkbox">
                     <input
                       type="checkbox"
-                      checked={showArrows}
-                      onChange={(e) => setShowArrows(e.target.checked)}
+                      checked={showPathLine}
+                      onChange={(e) => setShowPathLine(e.target.checked)}
                     />
-                    Arrows
+                    Path
                   </label>
                 </div>
               </div>
@@ -361,7 +361,8 @@ const pointsMap: Record<string, Point[]> = {
                         segments={currentPath.segments}
                         pathColor={pathColor}
                         pathWidth={pathWidth}
-                        showArrows={showArrows}
+                        showArrows={true}
+                        showLine={showPathLine}
                         arrowColor={pathColor}
                       />
                     )}

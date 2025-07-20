@@ -174,6 +174,23 @@ export function calculateAngle(from: Point, to: Point): number {
   return Math.atan2(to.y - from.y, to.x - from.x) * (180 / Math.PI);
 }
 
+const Arrow: React.FC<{ point: Point; angle: number; color: string }> = ({ point, angle, color }) => (
+  <div
+    style={{
+      position: 'absolute',
+      left: `${point.x}%`,
+      top: `${point.y}%`,
+      transform: `translate(-50%, -70%) rotate(${angle}rad)`,
+      pointerEvents: 'none',
+      zIndex: 1001,
+    }}
+  >
+    <svg width="20" height="20" viewBox="0 0 20 20">
+      <polygon points="0,10 15,5 10,10 15,15" fill={color} stroke={color} strokeWidth="1" />
+    </svg>
+  </div>
+);
+
 // Component to render path segments
 export const PathRenderer: React.FC<{
   segments: PathSegment[];
@@ -181,12 +198,18 @@ export const PathRenderer: React.FC<{
   pathWidth?: number;
   showArrows?: boolean;
   arrowColor?: string;
-}> = ({ 
-  segments, 
-  pathColor = '#ff0000', 
+  showLine?: boolean;
+  startPoint?: Point;
+  endPoint?: Point;
+}> = ({
+  segments,
+  pathColor = '#ff0000',
   pathWidth = 2,
   showArrows = true,
-  arrowColor = '#ff0000'
+  arrowColor = '#ff0000',
+  showLine = false,
+  startPoint,
+  endPoint,
 }) => {
   return (
     <>
@@ -203,20 +226,22 @@ export const PathRenderer: React.FC<{
         return (
           <div key={index}>
             {/* Path line */}
-            <div
-              style={{
-                position: 'absolute',
-                left: `${from.x}%`,
-                top: `${from.y}%`,
-                width: `${length}%`,
-                height: `${pathWidth}px`,
-                backgroundColor: pathColor,
-                transformOrigin: '0 50%',
-                transform: `translateY(-2px) rotate(${angle}rad)`,
-                pointerEvents: 'none',
-                zIndex: 1000
-              }}
-            />
+            {showLine && (
+              <div
+                style={{
+                  position: 'absolute',
+                  left: `${from.x}%`,
+                  top: `${from.y}%`,
+                  width: `${length}%`,
+                  height: `${pathWidth}px`,
+                  backgroundColor: pathColor,
+                  transformOrigin: '0 50%',
+                  transform: `translateY(-2px) rotate(${angle}rad)`,
+                  pointerEvents: 'none',
+                  zIndex: 1000,
+                }}
+              />
+            )}
             
             {/* Direction arrow */}
             {showArrows && (
@@ -225,7 +250,7 @@ export const PathRenderer: React.FC<{
                   position: 'absolute',
                   left: `${centerX}%`,
                   top: `${centerY}%`,
-                  transform: `translate(-40%, -50%) rotate(${angle}rad)`,
+                  transform: `translate(-50%, -70%) rotate(${angle}rad)`,
                   pointerEvents: 'none',
                   zIndex: 1001
                 }}
@@ -243,6 +268,24 @@ export const PathRenderer: React.FC<{
           </div>
         );
       })}
+
+      {/* Start Point Arrow */}
+      {showArrows && startPoint && segments.length > 0 && (
+        <Arrow
+          point={startPoint}
+          angle={Math.atan2(segments[0].from.y - startPoint.y, segments[0].from.x - startPoint.x)}
+          color={arrowColor}
+        />
+      )}
+
+      {/* End Point Arrow */}
+      {showArrows && endPoint && segments.length > 0 && (
+        <Arrow
+          point={endPoint}
+          angle={Math.atan2(endPoint.y - segments[segments.length - 1].to.y, endPoint.x - segments[segments.length - 1].to.x)}
+          color={arrowColor}
+        />
+      )}
     </>
   );
 };

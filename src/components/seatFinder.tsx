@@ -27,6 +27,9 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const [tempLocation, setTempLocation] = useState(myLocation);
 
   const filteredEmployees = useMemo(() => {
+        if (selectedEmployee){
+      setSelectedEmployee(null);
+    }
     const trimmedQuery = searchValue.trim().toLowerCase();
     if (!trimmedQuery) return [];
     const filtered = employeeList.filter((employee) => {
@@ -72,6 +75,9 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   }, [searchValue, employeeList, sortBy, orderBy]);
 
   const filteredMeetingRooms = useMemo(() => {
+    if (selectedRoom){
+      setSelectedRoom(null);
+    }
     const trimmedQuery = searchValue.trim().toLowerCase();
     if (!trimmedQuery) return [];
     return meetingRoomList.filter((room) => {
