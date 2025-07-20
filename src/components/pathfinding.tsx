@@ -174,24 +174,25 @@ export function calculateAngle(from: Point, to: Point): number {
   return Math.atan2(to.y - from.y, to.x - from.x) * (180 / Math.PI);
 }
 
-const Arrow: React.FC<{ point: Point; angle: number; color: string }> = ({ point, angle, color }) => (
-  <div
-    style={{
-      position: 'absolute',
-      left: `${point.x}%`,
-      top: `${point.y}%`,
-      transform: `translate(-50%, -70%) rotate(${angle}rad)`,
-      pointerEvents: 'none',
-      zIndex: 1001,
-    }}
-  >
-    <svg width="20" height="20" viewBox="0 0 20 20">
-      <polygon points="0,10 15,5 10,10 15,15" fill={color} stroke={color} strokeWidth="1" />
-    </svg>
-  </div>
-);
+// const Arrow: React.FC<{ point: Point; angle: number; color: string }> = ({ point, angle, color }) => (
+//   <div
+//     style={{
+//       position: 'absolute',
+//       left: `${point.x}%`,
+//       top: `${point.y}%`,
+//       transform: `translate(-50%, -70%) rotate(${angle}rad)`,
+//       pointerEvents: 'none',
+//       zIndex: 1001,
+//     }}
+//   >
+//     <svg width="20" height="20" viewBox="0 0 20 20">
+//       <polygon points="0,10 15,5 10,10 15,15" fill={color} stroke={color} strokeWidth="1" />
+//     </svg>
+//   </div>
+// );
 
 // Component to render path segments
+
 export const PathRenderer: React.FC<{
   segments: PathSegment[];
   pathColor?: string;
