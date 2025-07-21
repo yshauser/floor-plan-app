@@ -41,6 +41,18 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   const [pathColor, setPathColor] = useState<string>('#ff0000');
   const [pathWidth, setPathWidth] = useState<number>(2);
   const [showPathLine, setShowPathLine] = useState<boolean>(false);
+  const [displayedFloor, setDisplayedFloor] = useState<string | null>(null);
+
+  const targetFloorChar = targetRoom ? targetRoom.charAt(0) : null;
+  const myLocationFloorChar = myLocation ? myLocation.charAt(0) : null;
+
+  useEffect(() => {
+    setDisplayedFloor(targetFloorChar);
+  }, [targetFloorChar]);
+
+  const handleSwitchFloor = () => {
+    setDisplayedFloor(current => current === targetFloorChar ? myLocationFloorChar : targetFloorChar);
+  };
 
   // Save colors to localStorage whenever they change
   useEffect(() => {
@@ -51,19 +63,13 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     localStorage.setItem('floorplan-target-color', targetColor);
   }, [targetColor]);
 
-  function getFirstChar(targetRoom?: string, myLocation?: string){
-    const firstChar = targetRoom?.charAt(0) || myLocation?.charAt(0);
-    return firstChar
-  }
-
 const pointsMap: Record<string, Point[]> = {
   '1': points_1,
   '2': points_2,
   '3': points_3,
   '4': points_4,
 };
-  const firstChar = getFirstChar(targetRoom, myLocation);
-  const selectedPoints = pointsMap[firstChar as keyof typeof pointsMap] ?? [];
+  const selectedPoints = pointsMap[displayedFloor as keyof typeof pointsMap] ?? [];
 
   const filteredPoints = selectedPoints.filter(point => (!point.label.startsWith('J')&&!point.label.startsWith('B')));
   const junctions = selectedPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
@@ -76,7 +82,7 @@ const pointsMap: Record<string, Point[]> = {
 
   
   const floorPlanSrc = (() => {
-    switch (firstChar) {
+    switch (displayedFloor) {
       case '1':
         return '/floor-plan-app/FloorPlan_1_clear.png';
       case '2':
@@ -344,6 +350,11 @@ const pointsMap: Record<string, Point[]> = {
                 <button className="fit-to-view-button" onClick={() => resetTransform()}>
                   Fit to view
                 </button>
+                {myLocationFloorChar && targetFloorChar && myLocationFloorChar !== targetFloorChar && (
+                  <button onClick={handleSwitchFloor} className="fit-to-view-button">
+                    Switch to Floor {displayedFloor === targetFloorChar ? myLocationFloorChar : targetFloorChar}
+                  </button>
+                )}
                 <button onClick={() => setShowPoints(!showPoints)}>
                   {showPoints ? 'Hide Points' : 'Show Points'}
                 </button>
@@ -366,10 +377,55 @@ const pointsMap: Record<string, Point[]> = {
                         showArrows={true}
                         showLine={showPathLine}
                         arrowColor={pathColor}
-                        startPoint={currentPath.segments[0].from}
-                        endPoint={currentPath.segments[currentPath.segments.length - 1].to}
                       />
                     )}
+                    {/* Render start and end junction points of the path */}
+                    {showNavigation && showPath && currentPath && currentPath.path.length > 0 &&
+                        (() => {
+                            const startJunctionLabel = currentPath.path[0];
+                            const endJunctionLabel = currentPath.path[currentPath.path.length - 1];
+
+                            const startJunctionPoint = junctions.find(j => j.label === startJunctionLabel);
+                            const endJunctionPoint = junctions.find(j => j.label === endJunctionLabel);
+
+                            return (
+                                <>
+                                    {startJunctionPoint && (
+                                        <div
+                                            style={{
+                                                position: 'absolute',
+                                                left: `${startJunctionPoint.x}%`,
+                                                top: `${startJunctionPoint.y - 0.5}%`,
+                                                transform: 'translate(-50%, -50%)',
+                                                backgroundColor: 'blue',
+                                                borderRadius: '5%',
+                                                width: '6px',
+                                                height: '6px',
+                                                pointerEvents: 'none',
+                                                zIndex: 999
+                                            }}
+                                        />
+                                    )}
+                                    {endJunctionPoint && (
+                                        <div
+                                            style={{
+                                                position: 'absolute',
+                                                left: `${endJunctionPoint.x}%`,
+                                                top: `${endJunctionPoint.y - 0.5}%`,
+                                                transform: 'translate(-50%, -50%)',
+                                                backgroundColor: 'blue',
+                                                borderRadius: '5%',
+                                                width: '6px',
+                                                height: '6px',
+                                                pointerEvents: 'none',
+                                                zIndex: 999
+                                            }}
+                                        />
+                                    )}
+                                </>
+                            )
+                        })()
+                    }
                     
                     {/* Render room points */}
                     {filteredPoints.map((point: Point, index: number) => {
@@ -392,25 +448,6 @@ const pointsMap: Record<string, Point[]> = {
                         />
                       );
                     })}
-
-                    {/* Render junction points when showPoints is enabled */}
-                    {showPoints && junctions.map((junction: Point, index: number) => (
-                      <div
-                        key={`junction-${index}`}
-                        style={{
-                          position: 'absolute',
-                          left: `${junction.x}%`,
-                          top: `${junction.y - 0.5}%`,
-                          transform: 'translate(-50%, -50%)',
-                          backgroundColor: 'blue',
-                          borderRadius: '50%',
-                          width: '6px',
-                          height: '6px',
-                          pointerEvents: 'none',
-                          zIndex: 999
-                        }}
-                      />
-                    ))}
                   </div>                
                 </TransformComponent>
               </>

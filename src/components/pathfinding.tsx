@@ -174,25 +174,7 @@ export function calculateAngle(from: Point, to: Point): number {
   return Math.atan2(to.y - from.y, to.x - from.x) * (180 / Math.PI);
 }
 
-// const Arrow: React.FC<{ point: Point; angle: number; color: string }> = ({ point, angle, color }) => (
-//   <div
-//     style={{
-//       position: 'absolute',
-//       left: `${point.x}%`,
-//       top: `${point.y}%`,
-//       transform: `translate(-50%, -70%) rotate(${angle}rad)`,
-//       pointerEvents: 'none',
-//       zIndex: 1001,
-//     }}
-//   >
-//     <svg width="20" height="20" viewBox="0 0 20 20">
-//       <polygon points="0,10 15,5 10,10 15,15" fill={color} stroke={color} strokeWidth="1" />
-//     </svg>
-//   </div>
-// );
-
 // Component to render path segments
-
 export const PathRenderer: React.FC<{
   segments: PathSegment[];
   pathColor?: string;
@@ -200,17 +182,13 @@ export const PathRenderer: React.FC<{
   showArrows?: boolean;
   arrowColor?: string;
   showLine?: boolean;
-  startPoint?: Point;
-  endPoint?: Point;
 }> = ({
   segments,
   pathColor = '#ff0000',
   pathWidth = 2,
   showArrows = true,
   arrowColor = '#ff0000',
-  showLine = false,
-  startPoint,
-  endPoint,
+  showLine = false
 }) => {
   return (
     <>
@@ -269,50 +247,6 @@ export const PathRenderer: React.FC<{
           </div>
         );
       })}
-
-      {/* Start Point Arrow */}
-{/* Start Rectangle */}
-{showArrows && startPoint && segments.length > 0 && (
-  <div
-    style={{
-      position: 'absolute',
-      left: `${startPoint.x}%`,
-      top: `${startPoint.y}%`,
-      width: '8px',
-      height: '8px',
-      backgroundColor: arrowColor,
-      transform: `translate(-50%, -50%) rotate(${Math.atan2(
-        segments[0].from.y - startPoint.y,
-        segments[0].from.x - startPoint.x
-      )}rad)`,
-      transformOrigin: 'center',
-      pointerEvents: 'none',
-      zIndex: 1001
-    }}
-  />
-)}
-
-{/* End Rectangle */}
-{showArrows && endPoint && segments.length > 0 && (
-  <div
-    style={{
-      position: 'absolute',
-      left: `${endPoint.x}%`,
-      top: `${endPoint.y}%`,
-      width: '8px',
-      height: '8px',
-      backgroundColor: arrowColor,
-      transform: `translate(-50%, -50%) rotate(${Math.atan2(
-        endPoint.y - segments[segments.length - 1].to.y,
-        endPoint.x - segments[segments.length - 1].to.x
-      )}rad)`,
-      transformOrigin: 'center',
-      pointerEvents: 'none',
-      zIndex: 1001
-    }}
-  />
-)}
-
     </>
   );
 };
