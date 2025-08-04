@@ -88,7 +88,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   }, [searchValue]);
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue((event.target.value).trim());
+    setSearchValue((event.target.value));//.trim()
   };
   const clearSearch = () => setSearchValue('');
 
@@ -153,7 +153,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   };
 
   const handleShowOnMap = () => {
-  console.log ('show on map',{searchValue,myLocation}, selectedRoom?.roomNumber);
+  console.log ('debug - show on map',{searchValue,myLocation}, selectedRoom?.roomNumber);
     let location = '';
     if (showMyLocation) {location = myLocation}
     if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,location)}

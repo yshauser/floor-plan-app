@@ -7,6 +7,7 @@ import Header from './components/Header';
 const App: React.FC = () => {
   const [showMap, setShowMap] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
+  const [isDevModeEnabled, setDevModeEnabled] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [myLocation, setMyLocation] = useState('');
   const [targetColor, setTargetColor] = useState(()=> {return localStorage.getItem('floorplan-target-color') || '#000000'; });//black
@@ -27,6 +28,8 @@ const App: React.FC = () => {
         setTargetColor={setTargetColor}
         showNavigation={showNavigation}
         setShowNavigation={setShowNavigation}
+        isDevModeEnabled={isDevModeEnabled}
+        setDevModeEnabled={setDevModeEnabled}
       />
       {/* <SeatFinder onShowOnMap={handleShowOnMap} /> */}
       <SeatFinder
@@ -43,6 +46,7 @@ const App: React.FC = () => {
         <div ref={floorPlanRef}>
           <FloorPlan
             showNavigation={showNavigation}
+            isDevModeEnabled={isDevModeEnabled}
             targetRoom={searchValue.trim()}
             setTargetRoom={setSearchValue}
             myLocation={myLocation.trim()}

@@ -268,3 +268,8 @@ input[type="range"]:active {
 .floor-plan-checkbox input[type="checkbox"] {
   margin: 0;
 }
+.floor-plan-checkbox-group {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}

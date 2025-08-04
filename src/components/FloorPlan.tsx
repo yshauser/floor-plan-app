@@ -11,6 +11,7 @@ import { PathRenderer, usePathfinding } from './pathfinding'; // Import pathfind
 
 interface FloorPlanProps {
   showNavigation: boolean;
+  isDevModeEnabled:boolean;
   targetRoom: string;
   setTargetRoom: (value: string) => void;
   myLocation: string;
@@ -24,6 +25,7 @@ interface FloorPlanProps {
 
 const FloorPlan: React.FC<FloorPlanProps> = ({ 
   showNavigation,
+  isDevModeEnabled,
   targetRoom,
   setTargetRoom, 
   myLocation, 
@@ -35,6 +37,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   onClose 
 }) => {
   const [showPoints, setShowPoints] = useState<boolean>(false);
+  const [showJunctions, setShowJunctions] = useState<boolean>(false);
   const [startSize, setStartSize] = useState<number>(8);
   const [targetSize, setTargetSize] = useState<number>(8);
   const [showPath, setShowPath] = useState<boolean>(false);
@@ -42,6 +45,8 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   const [pathWidth, setPathWidth] = useState<number>(2);
   const [showPathLine, setShowPathLine] = useState<boolean>(false);
   const [displayedFloor, setDisplayedFloor] = useState<string | null>(null);
+  const [useStairs, setUseStairs] = useState<boolean>(true);
+  const [useElevator, setUseElevator] = useState<boolean>(true);
 
   const targetFloorChar = targetRoom ? targetRoom.charAt(0) : null;
   const myLocationFloorChar = myLocation ? myLocation.charAt(0) : null;
@@ -73,7 +78,9 @@ const pointsMap: Record<string, Point[]> = {
 
   const filteredPoints = selectedPoints.filter(point => (!point.label.startsWith('J')&&!point.label.startsWith('B')));
   const junctions = selectedPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
-  const { currentPath, isPathfinding, findAndSetPath, clearPath } = usePathfinding(junctions);
+  const allPoints = [...points_1, ...points_2, ...points_3, ...points_4];
+  const allJunctions = allPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
+  const { currentPath, isPathfinding, findAndSetPath, clearPath } = usePathfinding(allJunctions);
 
   // console.log('Debug - currentPath:', currentPath);
   // console.log('Debug - myLocation:', myLocation);
@@ -92,7 +99,7 @@ const pointsMap: Record<string, Point[]> = {
       case '4':
         return '/floor-plan-app/FloorPlan_4.png';
       default:
-        return '';
+        return '/floor-plan-app/FloorPlan_4.png';
     }
   })();
 
@@ -113,16 +120,21 @@ const pointsMap: Record<string, Point[]> = {
   };
 
   // Find nearest junctions to room points
-  const findNearestJunction = React.useCallback((roomLabel: string): string | null => {
-    const roomPoint = filteredPoints.find(p => p.label === roomLabel);
+  const findNearestJunction = React.useCallback((roomLabel: string, floor: string | null): string | null => {
+    if (!floor) return null;
+
+    const floorPoints = pointsMap[floor as keyof typeof pointsMap] ?? [];
+    const floorJunctions = floorPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
+    const roomPoint = floorPoints.find(p => p.label === roomLabel);
+
     if (!roomPoint) return null;
 
     let nearestJunction = null;
     let minDistance = Infinity;
 
-    junctions.forEach(junction => {
+    floorJunctions.forEach(junction => {
       const distance = Math.sqrt(
-        Math.pow(junction.x - roomPoint.x, 2) + 
+        Math.pow(junction.x - roomPoint.x, 2) +
         Math.pow(junction.y - roomPoint.y, 2)
       );
       if (distance < minDistance) {
@@ -131,25 +143,24 @@ const pointsMap: Record<string, Point[]> = {
       }
     });
 
-    // console.log('Debug - findNearestJunction for', roomLabel, ':', nearestJunction);
     return nearestJunction;
-  }, [filteredPoints, junctions]);
+  }, [pointsMap]);
 
   const handleFindPath = React.useCallback(() => {
-    // console.log('Debug - handleFindPath called');
+    console.log('Debug - handleFindPath called');
     if (!myLocation || !targetRoom) {
       // console.log('Debug - Missing locations:', { myLocation, targetRoom });
       return;
     }
 
     // Find nearest junctions for both locations
-    const startJunction = findNearestJunction(myLocation);
-    const targetJunction = findNearestJunction(targetRoom);
+    const startJunction = findNearestJunction(myLocation, myLocationFloorChar);
+    const targetJunction = findNearestJunction(targetRoom, targetFloorChar);
 
-    // console.log('Debug - Found junctions:', { startJunction, targetJunction });
+    console.log('Debug - Found junctions:', { startJunction, targetJunction });
 
-    if (!startJunction || !targetJunction) {
-      // console.log('Debug - Could not find junctions');
+    if (!startJunction || !targetJunction || !targetFloorChar || !myLocationFloorChar) {
+      // console.log('Debug - Could not find junctions or floor chars');
       return;
     }
 
@@ -159,16 +170,17 @@ const pointsMap: Record<string, Point[]> = {
     }
 
     // console.log('Debug - Calling findAndSetPath');
-    findAndSetPath(targetJunction,startJunction, targetRoom,myLocation);
+    findAndSetPath(startJunction, targetJunction, myLocationFloorChar, targetFloorChar, useStairs, useElevator);
     setShowPath(true);
-  }, [myLocation, targetRoom, findNearestJunction, findAndSetPath]);
+  }, [myLocation, targetRoom, findNearestJunction, findAndSetPath, myLocationFloorChar, targetFloorChar, useStairs, useElevator]);
 
   const handleClearPath = React.useCallback(() => {
     clearPath();
     setShowPath(false);
   }, [clearPath]);
-  console.log (currentPath?.path.length," junctions");
-  console.log ("Route: ",currentPath?.path.join(' → '));
+  // console.log ("CURRENT", {currentPath}, showPath, showNavigation)
+  // console.log (currentPath?.path.length," junctions");
+  // console.log ("Route: ",currentPath?.path.join(' → '));
 
   // Auto-find path when both locations are set
   // useEffect(() => {
@@ -249,6 +261,26 @@ const pointsMap: Record<string, Point[]> = {
                   Clear Path
                 </button>
               )}
+              {myLocationFloorChar && targetFloorChar && myLocationFloorChar !== targetFloorChar && (
+                <div className="floor-plan-checkbox-group">
+                  <label className="floor-plan-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={useStairs}
+                      onChange={(e) => setUseStairs(e.target.checked)}
+                    />
+                    Use Stairs
+                  </label>
+                  <label className="floor-plan-checkbox">
+                    <input
+                      type="checkbox"
+                      checked={useElevator}
+                      onChange={(e) => setUseElevator(e.target.checked)}
+                    />
+                    Use Elevator
+                  </label>
+                </div>
+              )}
             </div>
           )}
         </div>
@@ -328,12 +360,12 @@ const pointsMap: Record<string, Point[]> = {
         </div>
 
         {/* Path information */}
-        {/* {showNavigation && currentPath && (
+        {showNavigation && currentPath && isDevModeEnabled &&(
           <div className="floor-plan-path-info">
             <p>Path found: {currentPath.path.length} junctions</p>
             <p>Route: {currentPath.path.join(' → ')}</p>
           </div>
-        )} */}
+        )}
         
         <div className="floor-plan-frame">
           <TransformWrapper
@@ -355,10 +387,18 @@ const pointsMap: Record<string, Point[]> = {
                     Switch to Floor {displayedFloor === targetFloorChar ? myLocationFloorChar : targetFloorChar}
                   </button>
                 )}
+
+              {isDevModeEnabled && (
+                <>
                 <button onClick={() => setShowPoints(!showPoints)}>
                   {showPoints ? 'Hide Points' : 'Show Points'}
                 </button>
-                
+                <button onClick={() => setShowJunctions(!showJunctions)}>
+                  {showJunctions ? 'Hide Junctions' : 'Show Junctions'}
+                </button>
+                </>
+                )}
+
                 <TransformComponent>
                   <div className="floor-plan-image-zommable-content">
                     <img
@@ -377,6 +417,7 @@ const pointsMap: Record<string, Point[]> = {
                         showArrows={true}
                         showLine={showPathLine}
                         arrowColor={pathColor}
+                        displayedFloor={displayedFloor}
                       />
                     )}
                     {/* Render start and end junction points of the path */}
@@ -384,9 +425,22 @@ const pointsMap: Record<string, Point[]> = {
                         (() => {
                             const startJunctionLabel = currentPath.path[0];
                             const endJunctionLabel = currentPath.path[currentPath.path.length - 1];
-
                             const startJunctionPoint = junctions.find(j => j.label === startJunctionLabel);
                             const endJunctionPoint = junctions.find(j => j.label === endJunctionLabel);
+
+                            const specialBLabel = currentPath.path.find((label, index) => {
+                                if (
+                                    label.startsWith('B') &&
+                                    index > 0 &&
+                                    index < currentPath.path.length - 1 &&
+                                    currentPath.path[index - 1][1] !== currentPath.path[index + 1][1]
+                                ) {
+                                    return true;
+                                }
+                                return false;
+                            });
+
+                            const specialBPoint = junctions.find(j => j.label === specialBLabel);
 
                             return (
                                 <>
@@ -422,6 +476,22 @@ const pointsMap: Record<string, Point[]> = {
                                             }}
                                         />
                                     )}
+                                    {specialBPoint && (
+                                        <div
+                                            style={{
+                                                position: 'absolute',
+                                                left: `${specialBPoint.x}%`,
+                                                top: `${specialBPoint.y - 0.5}%`,
+                                                transform: 'translate(-50%, -50%)',
+                                                backgroundColor: 'green',
+                                                borderRadius: '5%',
+                                                width: '6px',
+                                                height: '6px',
+                                                pointerEvents: 'none',
+                                                zIndex: 999
+                                            }}
+                                        />
+                                    )}
                                 </>
                             )
                         })()
@@ -448,6 +518,38 @@ const pointsMap: Record<string, Point[]> = {
                         />
                       );
                     })}
+
+                    {/* Render junctions points */}
+                   {junctions.map((point: Point, index: number) => {
+                    if (!showJunctions) return null;
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          position: 'absolute',
+                          left: `${point.x}%`,
+                          top: `${point.y - 0.5}%`,
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: getPointColor(point.label),
+                          borderRadius: '50%',
+                          width: `${getPointSize(point.label)}px`,
+                          height: `${getPointSize(point.label)}px`,
+                          pointerEvents: 'none',
+                          zIndex: 1002,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'black', // or any contrasting color
+                          fontSize: '10px', // adjust as needed
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap', 
+
+                        }}
+                      >
+                        {point.label}
+                      </div>
+                    );
+                  })}
                   </div>                
                 </TransformComponent>
               </>

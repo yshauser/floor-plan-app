@@ -83,6 +83,12 @@ width: max-content; /* expand box to have text of option in one line*/
 background-color: #f0f0f0;
 }
 
+.menu-dropdown div.submenu {
+  padding-left: 20px;
+  font-size: 0.95em;
+}
+
+
 .menu-button {
 position: relative;
 background: transparent;

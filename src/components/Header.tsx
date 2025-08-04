@@ -9,15 +9,28 @@ interface HeaderProps {
   setTargetColor?: (value: string) => void;
   showNavigation: boolean;
   setShowNavigation: (value: boolean) => void;
+  isDevModeEnabled: boolean;
+  setDevModeEnabled: (value: boolean) => void;
 }
-const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation, setShowNavigation}) => {
+const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation, setShowNavigation,isDevModeEnabled, setDevModeEnabled }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  
+  // const [isDevModeEnabled, setDevModeEnabled] = useState(false);
+  const [isSettingsOpen, setSettingsOpen] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
 
-
   const toggleMenu = () => setMenuOpen(!isMenuOpen);
+  
+  // const toggleDevMode = () => {
+  //   setDevModeEnabled(prev => !prev);
+  //   setMenuOpen(false);
+  // };
+
+  const toggleSettings = () => {
+    setSettingsOpen(prev => !prev);
+  };
 
   const handleClickOutside = (event: MouseEvent) => {
     if (
@@ -58,6 +71,7 @@ const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavig
               <line x1="4" x2="20" y1="18" y2="18" />
             </svg>
           </button>
+          
           {isMenuOpen && (
             <div className="menu-dropdown">
               <div onClick={handleRestoreDefaults}>
@@ -66,9 +80,18 @@ const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavig
               <div onClick={() => { setShowAbout(true); setMenuOpen(false); }}>
                 About
               </div>
-              <div onClick={() => { setShowNavigation(!showNavigation); setMenuOpen(false); }}>
-                {showNavigation ? 'Hide Navigation' : 'Show Navigation'}
-              </div>
+
+              <div onClick={toggleSettings}>Settings ▸</div>
+              {isSettingsOpen && (
+                <div style={{ paddingLeft: '10px' }}>
+                  <div onClick={() => { setShowNavigation(!showNavigation); setMenuOpen(false); setSettingsOpen(false); }}>
+                    {showNavigation ? 'Hide Navigation' : 'Show Navigation'}
+                  </div>
+                  <div onClick={()=> {setDevModeEnabled(!isDevModeEnabled); setMenuOpen(false); setSettingsOpen(false); }}>
+                    {isDevModeEnabled ? 'Close Dev Mode' : 'Enable Dev Mode'}
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

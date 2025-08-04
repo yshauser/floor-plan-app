@@ -2,13 +2,14 @@ import React from 'react';
 import type { Point } from '../data/floorplan';
 import junctions_4 from '../data/junctions_4.json';
 import junctions_3 from '../data/junctions_3.json';
-import { result } from 'lodash';
+// import { result } from 'lodash';
 
 // Types for pathfinding
 interface PathSegment {
   from: Point;
   to: Point;
   angle: number;
+  floor: string;
 }
 
 interface PathResult {
@@ -22,7 +23,8 @@ export function findPath(
   startLabel: string,
   targetLabel: string,
   junctionPoints: Point[],
-  connections: Record<string, string[]>
+  connections: Record<string, string[]>,
+  floor: string
 ): PathResult | null {
   
   // Create a map for quick point lookup
@@ -133,9 +135,11 @@ allJunctions.forEach(junction => {
 
   // If path doesn't start with startLabel, no path was found
   // if (path.length === 0 || path[0] !== startLabel) {
+  if (startLabel[0]===targetLabel[0]){
     if (path.length === 0 || path[0] !== startLabel || path[path.length - 1] !== targetLabel) {
-  console.warn('Invalid path constructed:', path);
+      console.warn('Invalid path constructed:', path.length, path[0], startLabel, path[path.length-1], targetLabel);
     return null;
+    }
   }
 
   // Create segments with angles for arrows
@@ -155,7 +159,8 @@ allJunctions.forEach(junction => {
       segments.push({
         from: fromPoint,
         to: toPoint,
-        angle: angle
+        angle: angle,
+        floor: floor
       });
       
       totalDistance += distance;
@@ -167,6 +172,52 @@ allJunctions.forEach(junction => {
     segments,
     totalDistance
   };
+}
+export function findPathBetweenFloors(
+  startLabel: string,
+  targetLabel: string,
+  startFloor: string,
+  targetFloor: string,
+  junctionPoints: Point[],
+  allConnections: Record<string, Record<string, string[]>>,
+  useStairs: boolean,
+  useElevator: boolean
+): PathResult | null {
+  const gateways = [];
+  if (useStairs) {
+    // gateways.push('B3-1-2', 'B3-2-2', 'B4-1-2', 'B4-2-2');
+    gateways.push('B1-2', 'B2-2');
+  }
+  if (useElevator) {
+    // gateways.push('B3-3', 'B4-3');
+    gateways.push('B3');
+  }
+
+  let bestPath: PathResult | null = null;
+
+  for (const gateway of gateways) {
+    const startFloorConnections = allConnections[startFloor];
+    const targetFloorConnections = allConnections[targetFloor];
+
+    if (!startFloorConnections || !targetFloorConnections) {
+      continue;
+    }
+    const path1 = findPath(startLabel, gateway, junctionPoints, startFloorConnections, startFloor);
+    const path2 = findPath(gateway, targetLabel, junctionPoints, targetFloorConnections, targetFloor);
+   
+    if (path1 && path2 ) {
+      const totalDistance = path1.totalDistance + path2.totalDistance;
+      if (!bestPath || totalDistance < bestPath.totalDistance) {
+        bestPath = {
+          path: [...path1.path, ...path2.path.slice(1)],
+          segments: [...path1.segments, ...path2.segments],
+          totalDistance: totalDistance,
+        };
+      }
+    }
+  }
+
+  return bestPath;
 }
 
 // Calculate angle for arrow rotation
@@ -182,17 +233,21 @@ export const PathRenderer: React.FC<{
   showArrows?: boolean;
   arrowColor?: string;
   showLine?: boolean;
+  displayedFloor: string | null;
 }> = ({
   segments,
   pathColor = '#ff0000',
   pathWidth = 2,
   showArrows = true,
   arrowColor = '#ff0000',
-  showLine = false
+  showLine = false,
+  displayedFloor
 }) => {
   return (
     <>
-      {segments.map((segment, index) => {
+      {segments
+        .filter(segment => segment.floor === displayedFloor)
+        .map((segment, index) => {
         const { from, to, angle } = segment;
         
         // Calculate line properties
@@ -256,19 +311,28 @@ export function usePathfinding(junctionPoints: Point[]) {
   const [currentPath, setCurrentPath] = React.useState<PathResult | null>(null);
   const [isPathfinding, setIsPathfinding] = React.useState(false);
 
-  const findAndSetPath = React.useCallback((startLabel: string, targetLabel: string, startFloor: string, targetFloor: string) => {
+  const findAndSetPath = React.useCallback((startLabel: string, targetLabel: string, startFloor: string, targetFloor: string, useStairs: boolean, useElevator: boolean) => {
     setIsPathfinding(true);
-    let junctions: Record<string, string[]>;
-      if (startFloor.startsWith('4') && targetFloor.startsWith('4')) {
-        junctions = junctions_4;
-      } else if (startFloor.startsWith('3') && targetFloor.startsWith('3')) {
-        junctions = junctions_3;
-      } else {
-        junctions = {};
-      }
+    
+    const allConnections = {
+      '3': junctions_3,
+      '4': junctions_4,
+    };
+
     try {
-      const result = findPath(startLabel, targetLabel, junctionPoints, junctions);
-        // console.log('Path result:', result); 
+      let result: PathResult | null = null;
+      console.log ('Debug - start and end', {startFloor, targetFloor})
+      if (startFloor === targetFloor) {
+        const connections = allConnections[startFloor as keyof typeof allConnections];
+        if (connections) {
+          result = findPath(startLabel, targetLabel, junctionPoints, connections, startFloor);
+          // console.log ('same floor', {startLabel, targetLabel, junctionPoints, connections, startFloor});
+        }
+      } else {
+        // console.log ('between floors', {startLabel, targetLabel, startFloor, targetFloor, junctionPoints, allConnections, useStairs, useElevator});
+        console.log ('Debug - between floors')
+        result = findPathBetweenFloors(startLabel, targetLabel, startFloor, targetFloor, junctionPoints, allConnections, useStairs, useElevator);
+      }
       setCurrentPath(result);
     } catch (error) {
       console.error('Pathfinding error:', error);
@@ -276,7 +340,6 @@ export function usePathfinding(junctionPoints: Point[]) {
     } finally {
       setIsPathfinding(false);
     }
-    console.log ('find and set path', {result})
   }, [junctionPoints]);
 
   const clearPath = React.useCallback(() => {
