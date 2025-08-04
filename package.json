@@ -2,8 +2,8 @@
   "name": "floor-plan-app",
   "homepage": "https://yhauser.github.io/floor-plan-app/",
   "private": true,
-  "version": "0.8.1",
-  "date": "21/07/2025",
+  "version": "0.8.2",
+  "date": "04/08/2025",
   "type": "module",
   "scripts": {
     "dev": "vite",
