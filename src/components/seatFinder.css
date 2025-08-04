@@ -208,7 +208,7 @@
   font-size: 1.125rem; /* text-lg */
   font-weight: 600; /* font-semibold */
   color: #1f2937; /* text-gray-800 */
-  margin-bottom: 1rem; /* mb-4 */
+  margin-bottom: 5px;
   display: flex; /* flex */
   align-items: center; /* items-center */
   gap: 0.5rem; /* gap-2 */

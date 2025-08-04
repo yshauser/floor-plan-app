@@ -24,6 +24,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   });
   const [showMyLocation, setShowMyLocation] = useState(false);
   const [showLocationInput, setShowLocationInput] = useState(false);
+  const [showOnlyMeetingRooms, setShowOnlyMeetingRooms] = useState(false);
   const [tempLocation, setTempLocation] = useState(myLocation);
 
   const filteredEmployees = useMemo(() => {
@@ -120,7 +121,11 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
 
   // Check if we should show search results
   const shouldShowResults = searchValue.trim() && 
-    (filteredEmployees.length > 0 || filteredMeetingRooms.length > 0) && 
+    // (filteredEmployees.length > 0 || filteredMeetingRooms.length > 0) && 
+      (
+    (showOnlyMeetingRooms && filteredMeetingRooms.length > 0) ||
+    (!showOnlyMeetingRooms && (filteredEmployees.length > 0 || filteredMeetingRooms.length > 0))
+  ) &&
     !selectedEmployee && 
     !selectedRoom;
 
@@ -151,6 +156,11 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
       setTempLocation('');
     }
   };
+
+  const hadnleShowOnlyMeetingRooms = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const checked = e.target.checked;
+    setShowOnlyMeetingRooms(checked);
+ }
 
   const handleShowOnMap = () => {
   console.log ('debug - show on map',{searchValue,myLocation}, selectedRoom?.roomNumber);
@@ -265,9 +275,24 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
           {shouldShowResults && (
             <div className="search-results-container">
               <div className="search-results-header">
+                <div>
               <h4 className="search-results-title">
                 Search Results ({filteredEmployees.length + filteredMeetingRooms.length})
               </h4>
+                {filteredEmployees.length > 0 && filteredMeetingRooms.length > 0&& (
+                  <div className="sort-control">
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={showOnlyMeetingRooms}
+                        onChange={hadnleShowOnlyMeetingRooms}
+                      />
+                      Only meeting rooms
+                    </label>
+                  </div>
+                )}
+                  
+                  </div>
                 <div className="sorting-controls">
                   <div className="sort-control">
                     <label htmlFor="sort-by" className="sort-label">Sort by:</label>
@@ -298,7 +323,7 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
               </div>
 
               <div className="search-results-list">
-                {filteredEmployees.map((employee, index) => (
+                {!showOnlyMeetingRooms && filteredEmployees.map((employee, index) => (
                   <div
                     key={index}
                     onClick={() => {selectEmployee(employee)}}
