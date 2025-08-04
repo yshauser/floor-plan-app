@@ -59,6 +59,10 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     setDisplayedFloor(current => current === targetFloorChar ? myLocationFloorChar : targetFloorChar);
   };
 
+  useEffect(() => {
+    handleClearPath();
+  },[targetRoom, myLocation]);
+
   // Save colors to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('floorplan-start-color', startColor);
@@ -170,7 +174,8 @@ const pointsMap: Record<string, Point[]> = {
     }
 
     // console.log('Debug - Calling findAndSetPath');
-    findAndSetPath(startJunction, targetJunction, myLocationFloorChar, targetFloorChar, useStairs, useElevator);
+    findAndSetPath(targetJunction, startJunction, targetFloorChar, myLocationFloorChar, useStairs, useElevator);
+    setDisplayedFloor(myLocationFloorChar);
     setShowPath(true);
   }, [myLocation, targetRoom, findNearestJunction, findAndSetPath, myLocationFloorChar, targetFloorChar, useStairs, useElevator]);
 
@@ -178,20 +183,7 @@ const pointsMap: Record<string, Point[]> = {
     clearPath();
     setShowPath(false);
   }, [clearPath]);
-  // console.log ("CURRENT", {currentPath}, showPath, showNavigation)
-  // console.log (currentPath?.path.length," junctions");
-  // console.log ("Route: ",currentPath?.path.join(' → '));
 
-  // Auto-find path when both locations are set
-  // useEffect(() => {
-  //   if (myLocation && targetRoom && myLocation.trim() !== '' && targetRoom.trim() !== '') {
-  //     console.log('Debug - Auto-finding path for:', myLocation, 'to', targetRoom);
-  //     handleFindPath();
-  //   } else {
-  //     console.log('Debug - Clearing path, locations incomplete');
-  //     handleClearPath();
-  //   }
-  // }, [myLocation, targetRoom]);
 
   return (
     <div className="floor-plan-container">
@@ -428,7 +420,7 @@ const pointsMap: Record<string, Point[]> = {
                             const startJunctionPoint = junctions.find(j => j.label === startJunctionLabel);
                             const endJunctionPoint = junctions.find(j => j.label === endJunctionLabel);
 
-                            const specialBLabel = currentPath.path.find((label, index) => {
+                            let specialBLabel = currentPath.path.find((label, index) => {
                                 if (
                                     label.startsWith('B') &&
                                     index > 0 &&
@@ -439,8 +431,11 @@ const pointsMap: Record<string, Point[]> = {
                                 }
                                 return false;
                             });
-
-                            const specialBPoint = junctions.find(j => j.label === specialBLabel);
+                            if (!specialBLabel) {
+                            const bLabels = currentPath.path.filter(label => label.startsWith('B'));
+                              specialBLabel = bLabels[0];
+                            }
+                            const firstBPoint = junctions.find(j => j.label === specialBLabel);
 
                             return (
                                 <>
@@ -476,12 +471,12 @@ const pointsMap: Record<string, Point[]> = {
                                             }}
                                         />
                                     )}
-                                    {specialBPoint && (
+                                    {firstBPoint && (
                                         <div
                                             style={{
                                                 position: 'absolute',
-                                                left: `${specialBPoint.x}%`,
-                                                top: `${specialBPoint.y - 0.5}%`,
+                                                left: `${firstBPoint.x}%`,
+                                                top: `${firstBPoint.y - 0.5}%`,
                                                 transform: 'translate(-50%, -50%)',
                                                 backgroundColor: 'green',
                                                 borderRadius: '5%',
