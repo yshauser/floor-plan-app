@@ -15,19 +15,12 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation, setShowNavigation,isDevModeEnabled, setDevModeEnabled }) => {
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
-  
-  // const [isDevModeEnabled, setDevModeEnabled] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleMenu = () => setMenuOpen(!isMenuOpen);
   
-  // const toggleDevMode = () => {
-  //   setDevModeEnabled(prev => !prev);
-  //   setMenuOpen(false);
-  // };
-
   const toggleSettings = () => {
     setSettingsOpen(prev => !prev);
   };
@@ -59,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavig
   useEffect(() => {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, []); 
  
   return (
       <header className="header">
@@ -83,14 +76,14 @@ const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavig
 
               <div onClick={toggleSettings}>Settings ▸</div>
               {isSettingsOpen && (
-                <div style={{ paddingLeft: '10px' }}>
-                  <div onClick={() => { setShowNavigation(!showNavigation); setMenuOpen(false); setSettingsOpen(false); }}>
-                    {showNavigation ? 'Hide Navigation' : 'Show Navigation'}
-                  </div>
-                  <div onClick={()=> {setDevModeEnabled(!isDevModeEnabled); setMenuOpen(false); setSettingsOpen(false); }}>
-                    {isDevModeEnabled ? 'Close Dev Mode' : 'Enable Dev Mode'}
-                  </div>
+              <>
+                <div className="submenu" onClick={() => { setShowNavigation(!showNavigation); setMenuOpen(false); setSettingsOpen(false); }}>
+                  {showNavigation ? 'Hide Navigation' : 'Show Navigation'}
                 </div>
+                <div  className="submenu" onClick={()=> {setDevModeEnabled(!isDevModeEnabled); setMenuOpen(false); setSettingsOpen(false); }}>
+                  {isDevModeEnabled ? 'Close Dev Mode' : 'Enable Dev Mode'}
+                </div>
+              </>
               )}
             </div>
           )}

@@ -454,7 +454,7 @@ export const employeeList: Employee[] = [
     {firstName: "Tomer", lastName: "Mordechai", seatNumber: "4S04F", floor: 4, wing: "S", department: " "},
     {firstName: "Itay", lastName: "Asher", seatNumber: "4S04G", floor: 4, wing: "S", department: " "},
     {firstName: "Elad", lastName: "Harambam", seatNumber: "4S04H", floor: 4, wing: "S", department: " "},
-    {firstName: "Eli", lastName: "Eljarrat", seatNumber: "4S04J\u00a0", floor: 4, wing: "S", department: " "},
+    {firstName: "Eli", lastName: "Eljarrat", seatNumber: "4S04J", floor: 4, wing: "S", department: " "},
     {firstName: "Guy", lastName: "Ingber", seatNumber: "4S08A", floor: 4, wing: "S", department: " "},
     {firstName: "Dor", lastName: "Edelman", seatNumber: "4S08B", floor: 4, wing: "S", department: " "},
     {firstName: "Daniel", lastName: "Knafel", seatNumber: "4S08C", floor: 4, wing: "S", department: " "},
@@ -570,6 +570,8 @@ export const meetingRoomList: MeetingRoom[] = [
   { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S03", floor: 4, wing: "S", capacity: 1 },
   { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S05", floor: 4, wing: "S", capacity: 1 },
   { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S07", floor: 4, wing: "S", capacity: 1 },
+  { Name: "HR Room", Type: "Meeting", roomNumber: "4S06", floor: 4, wing: "S", capacity: 1 },
+
   { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S10", floor: 4, wing: "S", capacity: 1 },
   { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S14", floor: 4, wing: "S", capacity: 1 },
   { Name: "Phone Booth", Type: "Phone Booth", roomNumber: "4S17", floor: 4, wing: "S", capacity: 1 },

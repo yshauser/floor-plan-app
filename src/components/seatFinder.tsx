@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
-import { employeeList, meetingRoomList } from '../data/seatPlan';
-import type { MeetingRoom } from '../data/seatPlan';
+import React, { useState, useEffect, useMemo } from 'react';
+// import { employeeList2, meetingRoomList2 } from '../data/seatPlan';
+import { getEmployees, getMeetingRooms } from '../services/firestoreService';
+import type { Employee, MeetingRoom } from '../types';
 import { Search, MapPin, Users, X, Building2 } from 'lucide-react';
 import './seatFinder.css';
 
@@ -12,6 +13,8 @@ interface SeatFinderProps {
 
 type SortBy = 'firstName' | 'lastName' | 'seat';
 type OrderBy = 'asc' | 'desc';
+
+
 
 const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const [searchValue, setSearchValue] = useState('');
@@ -26,6 +29,28 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [showOnlyMeetingRooms, setShowOnlyMeetingRooms] = useState(false);
   const [tempLocation, setTempLocation] = useState(myLocation);
+
+const [employeeList, setEmployeeList] = useState<Employee[]>([]);
+const [meetingRoomList, setMeetingRoomList] = useState<MeetingRoom[]>([]);
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      const employees = await getEmployees();
+      const rooms = await getMeetingRooms();
+      setEmployeeList(employees);
+      setMeetingRoomList(rooms);
+      // console.log ('Debug - FETCH EMPLOYEES', {employees})
+      // console.log ('Debug - FETCH ROOMS', {rooms})
+    } catch (error) {
+      console.error('Error loading data:', error);
+    }
+  };
+  fetchData();
+}, []);
+
+      // console.log ('Debug - LOADED EMPLOYEES', {employeeList})
+      // console.log ('Debug - LOADED ROOMS', {meetingRoomList})
 
   const filteredEmployees = useMemo(() => {
         if (selectedEmployee){
@@ -170,7 +195,15 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
     else if (selectedRoom?.roomNumber) {onShowOnMap(selectedRoom.roomNumber,location);}
     else {onShowOnMap('',location);}
   }
-
+  // const printEmployee = async () => {
+  //   try {
+  //     const employees = await getEmployees();
+  //     console.log('Employees:', employees);
+  //   } catch (error) {
+  //     console.error('Error printing employees:', error);
+  //   }
+  // };
+  // printEmployee();
 
 
   return (
