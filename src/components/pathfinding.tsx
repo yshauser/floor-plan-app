@@ -1,8 +1,7 @@
-import React from 'react';
-import type { Point } from '../data/floorplan';
-import junctions_4 from '../data/junctions_4.json';
-import junctions_3 from '../data/junctions_3.json';
-// import { result } from 'lodash';
+import React, {useEffect} from 'react';
+import type { Point } from '../types';
+import { getAllJunctionsFromAllMaps } from '../services/firestoreService';
+
 
 // Types for pathfinding
 interface PathSegment {
@@ -310,28 +309,50 @@ export const PathRenderer: React.FC<{
 export function usePathfinding(junctionPoints: Point[]) {
   const [currentPath, setCurrentPath] = React.useState<PathResult | null>(null);
   const [isPathfinding, setIsPathfinding] = React.useState(false);
+  const [allJunctionsList, setAllJunctionsList] = React.useState<Record<string, Record<string, string[]>>>({});
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const allJunctions = await getAllJunctionsFromAllMaps();
+        setAllJunctionsList(allJunctions);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // console.log ('Debug - ALL junctions from DB', allJunctionsList);
+
 
   const findAndSetPath = React.useCallback((startLabel: string, targetLabel: string, startFloor: string, targetFloor: string, useStairs: boolean, useElevator: boolean) => {
     setIsPathfinding(true);
     
-    const allConnections = {
-      '3': junctions_3,
-      '4': junctions_4,
-    };
+    // const allConnections = {
+    //   '3': junctions_3,
+    //   '4': junctions_4,
+    // };
+    
+
+    // console.log ('COMPARING', {allConnections, allJunctionsList})
 
     try {
       let result: PathResult | null = null;
       console.log ('Debug - start and end', {startFloor, targetFloor})
       if (startFloor === targetFloor) {
-        const connections = allConnections[startFloor as keyof typeof allConnections];
+        // const connections = allConnections[startFloor as keyof typeof allConnections];
+        const connections = allJunctionsList[startFloor as keyof typeof allJunctionsList];
         if (connections) {
           result = findPath(startLabel, targetLabel, junctionPoints, connections, startFloor);
+          console.log ('Debug - same floor')
           // console.log ('same floor', {startLabel, targetLabel, junctionPoints, connections, startFloor});
         }
       } else {
         // console.log ('between floors', {startLabel, targetLabel, startFloor, targetFloor, junctionPoints, allConnections, useStairs, useElevator});
         console.log ('Debug - between floors')
-        result = findPathBetweenFloors(startLabel, targetLabel, startFloor, targetFloor, junctionPoints, allConnections, useStairs, useElevator);
+        result = findPathBetweenFloors(startLabel, targetLabel, startFloor, targetFloor, junctionPoints, allJunctionsList, useStairs, useElevator);
       }
       setCurrentPath(result);
     } catch (error) {

@@ -16,3 +16,8 @@ export interface MeetingRoom {
   capacity: number;
 }
 
+export interface Point {
+    x: number;
+    y: number;
+    label: string;
+  }

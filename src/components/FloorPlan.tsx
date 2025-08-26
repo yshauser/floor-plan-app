@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react'; 
-import type { Point } from '../data/floorplan';
+import type { Point } from '../types';
 import { Search, Navigation, X, Route, RotateCcw } from 'lucide-react'; 
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import './FloorPlan.css';
-import points_4 from '../data/points_4.json'; 
-import points_3 from '../data/points_3.json'; 
-import points_2 from '../data/points_2.json'; 
-import points_1 from '../data/points_1.json'; 
+import { getAllPointsFromAllMaps } from '../services/firestoreService';
 import { PathRenderer, usePathfinding } from './pathfinding'; // Import pathfinding functions
 
 interface FloorPlanProps {
@@ -51,6 +48,24 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   const targetFloorChar = targetRoom ? targetRoom.charAt(0) : null;
   const myLocationFloorChar = myLocation ? myLocation.charAt(0) : null;
 
+  const [allPointsList, setAllPointsList] = useState<Record<string, Point[]>>({});
+
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const allPoints = await getAllPointsFromAllMaps();
+        setAllPointsList(allPoints);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // console.log ('Debug - ALL points from DB', allPointsList);
+
+
   useEffect(() => {
     setDisplayedFloor(targetFloorChar);
   }, [targetFloorChar]);
@@ -72,17 +87,19 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     localStorage.setItem('floorplan-target-color', targetColor);
   }, [targetColor]);
 
-const pointsMap: Record<string, Point[]> = {
-  '1': points_1,
-  '2': points_2,
-  '3': points_3,
-  '4': points_4,
-};
-  const selectedPoints = pointsMap[displayedFloor as keyof typeof pointsMap] ?? [];
+  
+// const pointsMap: Record<string, Point[]> = React.useMemo(() => {
+//   console.log ('here I am', allPointsList)
+//     const map: Record<string, Point[]> = {};
+//     return map;
+//   }, [allPointsList]);
 
+  const selectedPoints = displayedFloor ? allPointsList[displayedFloor] ?? [] : [];
   const filteredPoints = selectedPoints.filter(point => (!point.label.startsWith('J')&&!point.label.startsWith('B')));
+  // console.log ('Debug - FILTER', {selectedPoints, filteredPoints, displayedFloor, allPointsList, targetFloorChar})
   const junctions = selectedPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
-  const allPoints = [...points_1, ...points_2, ...points_3, ...points_4];
+  // const allPoints = allPointsList;
+  const allPoints: Point[] = Object.values(allPointsList).flat();
   const allJunctions = allPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
   const { currentPath, isPathfinding, findAndSetPath, clearPath } = usePathfinding(allJunctions);
 
@@ -127,7 +144,7 @@ const pointsMap: Record<string, Point[]> = {
   const findNearestJunction = React.useCallback((roomLabel: string, floor: string | null): string | null => {
     if (!floor) return null;
 
-    const floorPoints = pointsMap[floor as keyof typeof pointsMap] ?? [];
+    const floorPoints = allPointsList[floor as keyof typeof allPointsList] ?? [];
     const floorJunctions = floorPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
     const roomPoint = floorPoints.find(p => p.label === roomLabel);
 
@@ -148,7 +165,7 @@ const pointsMap: Record<string, Point[]> = {
     });
 
     return nearestJunction;
-  }, [pointsMap]);
+  }, [allPointsList]);
 
   const handleFindPath = React.useCallback(() => {
     console.log('Debug - handleFindPath called');
