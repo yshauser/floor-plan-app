@@ -151,3 +151,30 @@ text-align: center;
 display: block;
 margin: 1.5rem auto 0; /* Center the button horizontally */
 }
+
+.confirm-button, .cancel-button {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 0 8px;
+  transition: background-color 0.2s;
+}
+
+.confirm-button {
+  background: #dc3545; /* Red for danger/confirm logout */
+  color: white;
+}
+
+.confirm-button:hover {
+  background: #c82333;
+}
+
+.cancel-button {
+  background: #6c757d; /* Gray for cancel */
+  color: white;
+}
+
+.cancel-button:hover {
+  background: #5a6268;
+}

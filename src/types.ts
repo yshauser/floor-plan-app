@@ -5,6 +5,7 @@ export interface Employee {
   floor: number;
   wing: string;
   department: string;
+  email: string; // Added email field
 }
 
 export interface MeetingRoom {
@@ -21,3 +22,10 @@ export interface Point {
     y: number;
     label: string;
   }
+
+export interface FacilityRoom {
+  Type: string;
+  roomNumber: string;
+  floor: number;
+  wing: string;
+}

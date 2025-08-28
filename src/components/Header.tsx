@@ -3,6 +3,7 @@
 import React, {useState, useRef, useEffect} from 'react';
 import './Header.css';
 import packageJson from '../../package.json'; // Adjust path as needed
+import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
   setStartColor?: (value: string) => void;
@@ -13,9 +14,11 @@ interface HeaderProps {
   setDevModeEnabled: (value: boolean) => void;
 }
 const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation, setShowNavigation,isDevModeEnabled, setDevModeEnabled }) => {
+  const { user, logout } = useAuth();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -85,9 +88,23 @@ const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavig
                 </div>
               </>
               )}
+              <div onClick={() => { setShowLogoutConfirm(true); setMenuOpen(false); }}>
+                Logout ({user?.toLowerCase()})
+              </div>
             </div>
           )}
         </div>
+
+        {showLogoutConfirm && (
+          <div className="modal-overlay" onClick={() => setShowLogoutConfirm(false)}>
+            <div className="about-modal-content" onClick={(e) => e.stopPropagation()}>
+              <h2>Confirm Logout</h2>
+              <p>Do you want to logout?</p>
+              <button onClick={() => { logout(); setShowLogoutConfirm(false); }} className="confirm-button">Yes</button>
+              <button onClick={() => setShowLogoutConfirm(false)} className="cancel-button">No</button>
+            </div>
+          </div>
+        )}
 
       
 

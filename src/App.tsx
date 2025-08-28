@@ -2,9 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import FloorPlan from './components/FloorPlan';
 import SeatFinder from './components/seatFinder';
 import Header from './components/Header';
-// import { svgContent } from './data/floorplan';
+import LoginDialog from './components/LoginDialog';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { checkEmployeeExists } from './services/firestoreService';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
+  const { user, login } = useAuth();
   const [showMap, setShowMap] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
   const [isDevModeEnabled, setDevModeEnabled] = useState(false);
@@ -13,18 +16,32 @@ const App: React.FC = () => {
   const [targetColor, setTargetColor] = useState(()=> {return localStorage.getItem('floorplan-target-color') || '#000000'; });//black
   const [startColor, setStartColor] = useState(()=> {return localStorage.getItem('floorplan-start-color')|| '#0000ff'});//blue
   const floorPlanRef = useRef<HTMLDivElement | null>(null);
+  const [loginError, setLoginError] = useState<string | null>(null);
 
-  // console.log ('app', {searchValue, myLocation, startColor, targetColor})
   useEffect(() => {
     if (showMap && floorPlanRef.current) {
       floorPlanRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [showMap]);
 
+  const handleLogin = async (email: string) => {
+    const employeeExists = await checkEmployeeExists(email);
+    if (employeeExists) {
+      login(email);
+      setLoginError(null);
+    } else {
+      setLoginError("No such user/email found.");
+    }
+  };
+
+  if (!user) {
+    return <LoginDialog onLogin={handleLogin} errorMessage={loginError} />;
+  }
+
   return (
     <>
-      <Header 
-        setStartColor={setStartColor}  
+      <Header
+        setStartColor={setStartColor}
         setTargetColor={setTargetColor}
         showNavigation={showNavigation}
         setShowNavigation={setShowNavigation}
@@ -63,6 +80,14 @@ const App: React.FC = () => {
         </div>
       )}
     </>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 };
 

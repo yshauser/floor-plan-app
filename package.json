@@ -2,8 +2,8 @@
   "name": "floor-plan-app",
   "homepage": "https://yhauser.github.io/floor-plan-app/",
   "private": true,
-  "version": "1.0.3",
-  "date": "26/08/2025",
+  "version": "1.0.4",
+  "date": "28/08/2025",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -15,7 +15,8 @@
     "deploy": "gh-pages -d dist",
     "deploy2": "vite build && vite gh-pages",
     "db:populate": "vite-node src/scripts/populateDb.ts",
-    "db:populate2": "vite-node src/scripts/populatePointsAndJunctions.ts"
+    "db:populate2": "vite-node src/scripts/populatePointsAndJunctions.ts",
+    "db:updateEmails": "vite-node src/scripts/updateEmployeeEmails.ts"
   },
   "dependencies": {
     "@react-pdf-viewer/core": "^3.12.0",

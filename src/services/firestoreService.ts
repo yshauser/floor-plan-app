@@ -1,22 +1,17 @@
-import { 
-  collection, 
-  getDocs, 
-  doc, 
-//   setDoc, 
-//   deleteDoc, 
-//   query, 
-//   where,
-//   updateDoc,
-//   addDoc,
-//   writeBatch,
+import {
+  collection,
+  getDocs,
+  doc,
+  query,
+  where,
   getDoc,
-  // type DocumentData
 } from 'firebase/firestore';
 import { db } from '../firebase';
-import type { Point, Employee, MeetingRoom } from '../types';
+import type { Point, Employee, MeetingRoom, FacilityRoom } from '../types';
 
 const EMPLOYEES_COLLECTION = 'employees';
 const MEETINGROOMS_COLLECTION = 'meetingRooms';
+const FACILITYROOMS_COLLECTION = 'facilityRooms';
 const POINTS_COLLECTION = 'points';
 const POINTS_DOCUMENT = 'allPoints';
 const JUNCTIONS_COLLECTION = 'junctions';
@@ -44,9 +39,26 @@ export const getEmployees = async (): Promise<Employee[]> => {
   return getCollection<Employee>(EMPLOYEES_COLLECTION);
 };
 
+export const checkEmployeeExists = async (email: string): Promise<boolean> => {
+  try {
+    const employeesRef = collection(db, EMPLOYEES_COLLECTION);
+    const q = query(employeesRef, where("email", "==", email.toLowerCase()));
+    const querySnapshot = await getDocs(q);
+    return !querySnapshot.empty;
+  } catch (error) {
+    console.error("Error checking employee existence:", error);
+    throw error;
+  }
+};
+
 // Get meeting rooms specifically  
 export const getMeetingRooms = async (): Promise<MeetingRoom[]> => {
   return getCollection<MeetingRoom>(MEETINGROOMS_COLLECTION);
+};
+
+// Get facility rooms specifically  
+export const getFacilityRooms = async (): Promise<FacilityRoom[]> => {
+  return getCollection<FacilityRoom>(FACILITYROOMS_COLLECTION);
 };
 
 // Get points specifically  

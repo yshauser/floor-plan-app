@@ -515,6 +515,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                       return (
                         <div
                           key={index}
+                          title={point.label}
                           style={{
                             position: 'absolute',
                             left: `${point.x}%`,
@@ -524,7 +525,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                             borderRadius: '50%',
                             width: `${getPointSize(point.label)}px`,
                             height: `${getPointSize(point.label)}px`,
-                            pointerEvents: 'none',
+                            pointerEvents: 'auto',
                             zIndex: 1002
                           }}
                         />

@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 // import { employeeList2, meetingRoomList2 } from '../data/seatPlan';
-import { getEmployees, getMeetingRooms } from '../services/firestoreService';
-import type { Employee, MeetingRoom } from '../types';
+import { getEmployees, getMeetingRooms, getFacilityRooms } from '../services/firestoreService';
+import type { Employee, MeetingRoom, FacilityRoom } from '../types';
 import { Search, MapPin, Users, X, Building2 } from 'lucide-react';
 import './seatFinder.css';
+// import { values } from 'lodash';
 
 interface SeatFinderProps {
   searchValue: string;
@@ -19,7 +20,8 @@ type OrderBy = 'asc' | 'desc';
 const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const [searchValue, setSearchValue] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
-  const [selectedRoom, setSelectedRoom] = useState<MeetingRoom | null>(null);
+  const [selectedMeetingRoom, setSelectedMeetingRoom] = useState<MeetingRoom | null>(null);
+  const [selectedFacilityRoom, setSelectedFacilityRoom] = useState<FacilityRoom | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>('firstName');
   const [orderBy, setOrderBy] = useState<OrderBy>('asc');
   const [myLocation, setMyLocation] = useState(() => {
@@ -32,16 +34,20 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
 
 const [employeeList, setEmployeeList] = useState<Employee[]>([]);
 const [meetingRoomList, setMeetingRoomList] = useState<MeetingRoom[]>([]);
+const [facilityRoomList, setFacilityRoomList] = useState<FacilityRoom[]>([]);
 
 useEffect(() => {
   const fetchData = async () => {
     try {
       const employees = await getEmployees();
-      const rooms = await getMeetingRooms();
+      const meetingRooms = await getMeetingRooms();
+      const facilityRooms = await getFacilityRooms();
       setEmployeeList(employees);
-      setMeetingRoomList(rooms);
+      setMeetingRoomList(meetingRooms);
+      setFacilityRoomList(facilityRooms);
       // console.log ('Debug - FETCH EMPLOYEES', {employees})
-      // console.log ('Debug - FETCH ROOMS', {rooms})
+      // console.log ('Debug - FETCH MEETING ROOMS', {meetingRooms})
+      // console.log ('Debug - FETCH FACILITY ROOMS', {facilityRooms})
     } catch (error) {
       console.error('Error loading data:', error);
     }
@@ -50,7 +56,8 @@ useEffect(() => {
 }, []);
 
       // console.log ('Debug - LOADED EMPLOYEES', {employeeList})
-      // console.log ('Debug - LOADED ROOMS', {meetingRoomList})
+      // console.log ('Debug - LOADED MEETING ROOMS', {meetingRoomList})
+      // console.log ('Debug - LOADED FACILITY ROOMS', {facilityRoomList});
 
   const filteredEmployees = useMemo(() => {
         if (selectedEmployee){
@@ -101,8 +108,8 @@ useEffect(() => {
   }, [searchValue, employeeList, sortBy, orderBy]);
 
   const filteredMeetingRooms = useMemo(() => {
-    if (selectedRoom){
-      setSelectedRoom(null);
+    if (selectedMeetingRoom){
+      setSelectedMeetingRoom(null);
     }
     const trimmedQuery = searchValue.trim().toLowerCase();
     if (!trimmedQuery) return [];
@@ -113,26 +120,55 @@ useEffect(() => {
     });
   }, [searchValue]);
 
+  const filteredFacilityRooms = useMemo(() => {
+    if (selectedFacilityRoom){
+      setSelectedFacilityRoom(null);
+    }
+    const trimmedQuery = searchValue.trim().toLowerCase();
+    if (!trimmedQuery) return [];
+    return facilityRoomList.filter((room) => {
+      const roomType = room.Type.toLowerCase();
+      const roomNumber = room.roomNumber.toLowerCase();
+      return roomType.includes(trimmedQuery) || roomNumber.includes(trimmedQuery);
+    });
+  }, [searchValue]);
+
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (showOnlyMeetingRooms && filteredMeetingRooms.length === 0) {
+      setShowOnlyMeetingRooms(false);
+    }
     setSearchValue((event.target.value));//.trim()
+    console.log ('Debug - search value', event.target.value, "xx ", filteredMeetingRooms.length, filteredEmployees.length, filteredFacilityRooms.length, {showOnlyMeetingRooms},);
+
+    // clearSelection();
   };
   const clearSearch = () => setSearchValue('');
 
   const selectEmployee = (employee: any) => {
     setSelectedEmployee(employee);
-    setSelectedRoom(null);
+    setSelectedMeetingRoom(null);
+    setSelectedFacilityRoom(null);
     // setSearchValue(`${employee.firstName} ${employee.lastName}`);
   };
 
   const selectMeetingRoom = (room: MeetingRoom) => {
-    setSelectedRoom(room);
+    setSelectedMeetingRoom(room);
+    setSelectedFacilityRoom(null);
+    setSelectedEmployee(null);
+    // setSearchValue((room.Name).trim());
+  };
+
+  const selectFacilityRoom = (room: FacilityRoom) => {
+    setSelectedMeetingRoom(null);
+    setSelectedFacilityRoom(room);
     setSelectedEmployee(null);
     // setSearchValue((room.Name).trim());
   };
 
   const clearSelection = () => {
     setSelectedEmployee(null);
-    setSelectedRoom(null);
+    setSelectedFacilityRoom(null);
+    setSelectedMeetingRoom(null);
     // Keep the search value to re-show the results
   };
 
@@ -149,10 +185,11 @@ useEffect(() => {
     // (filteredEmployees.length > 0 || filteredMeetingRooms.length > 0) && 
       (
     (showOnlyMeetingRooms && filteredMeetingRooms.length > 0) ||
-    (!showOnlyMeetingRooms && (filteredEmployees.length > 0 || filteredMeetingRooms.length > 0))
+    (!showOnlyMeetingRooms && (filteredEmployees.length > 0 || filteredMeetingRooms.length > 0 || filteredFacilityRooms.length > 0))
   ) &&
     !selectedEmployee && 
-    !selectedRoom;
+    !selectedMeetingRoom && 
+    !selectedFacilityRoom;
 
   const handleSetLocationClick= () => {
     setTempLocation(myLocation);
@@ -165,7 +202,7 @@ useEffect(() => {
     if (showMyLocation){ 
       // push to FloorPlan if checkbox checked
       if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,tempLocation)}
-      else if (selectedRoom?.roomNumber) {onShowOnMap(selectedRoom.roomNumber,tempLocation);}
+      else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,tempLocation);}
       else {onShowOnMap('',tempLocation);}
     }
   };
@@ -175,7 +212,7 @@ useEffect(() => {
     setShowMyLocation(checked);
     if (checked && myLocation !== '') {
       if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,myLocation)}
-      else if (selectedRoom?.roomNumber) {onShowOnMap(selectedRoom.roomNumber,myLocation);}
+      else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,myLocation);}
       else {onShowOnMap('',myLocation);}
     }else if (!checked){
       setTempLocation('');
@@ -188,22 +225,14 @@ useEffect(() => {
  }
 
   const handleShowOnMap = () => {
-  console.log ('debug - show on map',{searchValue,myLocation}, selectedRoom?.roomNumber);
+  console.log ('debug - show on map',{searchValue,myLocation}, selectedMeetingRoom?.roomNumber, selectedFacilityRoom?.roomNumber);
     let location = '';
     if (showMyLocation) {location = myLocation}
     if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,location)}
-    else if (selectedRoom?.roomNumber) {onShowOnMap(selectedRoom.roomNumber,location);}
+    else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,location);}
+    else if (selectedFacilityRoom?.roomNumber) {onShowOnMap(selectedFacilityRoom.roomNumber,location);}
     else {onShowOnMap('',location);}
   }
-  // const printEmployee = async () => {
-  //   try {
-  //     const employees = await getEmployees();
-  //     console.log('Employees:', employees);
-  //   } catch (error) {
-  //     console.error('Error printing employees:', error);
-  //   }
-  // };
-  // printEmployee();
 
 
   return (
@@ -236,7 +265,6 @@ useEffect(() => {
               <X className="search-icon" />
               </button>
             )}
-
           </div>
 
           {selectedEmployee  && (
@@ -273,7 +301,7 @@ useEffect(() => {
             </div>
           )}
 
-          {selectedRoom && (
+          {selectedMeetingRoom && (
             <div className="selected-employee-container">
               <div className="selected-employee-info-wrapper">
                 <div className="selected-employee-details">
@@ -281,9 +309,9 @@ useEffect(() => {
                     <Building2 className="selected-employee-icon" />
                   </div>
                   <div>
-                    <div className="selected-employee-name">{selectedRoom.Name}</div>
+                    <div className="selected-employee-name">{selectedMeetingRoom.Name}</div>
                     <div className="selected-employee-department">
-                      Room {selectedRoom.roomNumber} • Floor {selectedRoom.floor} • Wing {selectedRoom.wing} • Capacity {selectedRoom.capacity} • {selectedRoom.Type} Room
+                      Room {selectedMeetingRoom.roomNumber} • Floor {selectedMeetingRoom.floor} • Wing {selectedMeetingRoom.wing} • Capacity {selectedMeetingRoom.capacity} • {selectedMeetingRoom.Type} Room
                     </div>
                   </div>
                 </div>
@@ -294,7 +322,39 @@ useEffect(() => {
                   <X className="selected-employee-close-icon" />
                 </button>
               </div>
-              {(selectedRoom.floor === 4 || selectedRoom.floor === 3 || selectedRoom.floor === 2 || selectedRoom.floor === 1) && (
+              {(selectedMeetingRoom.floor === 4 || selectedMeetingRoom.floor === 3 || selectedMeetingRoom.floor === 2 || selectedMeetingRoom.floor === 1) && (
+              <button
+                className="map-toggle-button"
+                onClick={handleShowOnMap}
+              >
+                Show on Map
+              </button>
+              )}
+            </div>
+          )}
+
+          {selectedFacilityRoom && (
+            <div className="selected-employee-container">
+              <div className="selected-employee-info-wrapper">
+                <div className="selected-employee-details">
+                  <div className="selected-employee-icon-wrapper">
+                    <Building2 className="selected-employee-icon" />
+                  </div>
+                  <div>
+                    <div className="selected-employee-name">{selectedFacilityRoom.Type}</div>
+                    <div className="selected-employee-department">
+                      Room <strong>{selectedFacilityRoom.roomNumber}</strong> • Floor {selectedFacilityRoom.floor} • Wing {selectedFacilityRoom.wing}
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={clearSelection}
+                  className="selected-employee-close-button"
+                >
+                  <X className="selected-employee-close-icon" />
+                </button>
+              </div>
+              {(selectedFacilityRoom.floor === 4 || selectedFacilityRoom.floor === 3 || selectedFacilityRoom.floor === 2 || selectedFacilityRoom.floor === 1) && (
               <button
                 className="map-toggle-button"
                 onClick={handleShowOnMap}
@@ -310,9 +370,9 @@ useEffect(() => {
               <div className="search-results-header">
                 <div>
               <h4 className="search-results-title">
-                Search Results ({filteredEmployees.length + filteredMeetingRooms.length})
+                Search Results ({filteredEmployees.length + filteredMeetingRooms.length + filteredFacilityRooms.length})
               </h4>
-                {filteredEmployees.length > 0 && filteredMeetingRooms.length > 0&& (
+                {(filteredEmployees.length > 0 || filteredFacilityRooms.length > 0 )&& filteredMeetingRooms.length > 0 && (
                   <div className="sort-control">
                     <label>
                       <input
@@ -389,31 +449,61 @@ useEffect(() => {
                     </div>
                   </div>
                 ))}
-                {filteredMeetingRooms.map((room, index) => (
+                {filteredMeetingRooms.map((meeting, index) => (
                   <div
                     key={index}
-                    onClick={() => selectMeetingRoom(room)}
+                    onClick={() => selectMeetingRoom(meeting)}
                     className="search-result-item group"
                   >
                     <div className="search-result-content">
                       <div className="search-result-employee-info">
                         <div className="search-result-avatar-wrapper">
-                          <span className="search-result-avatar-text">{room.Name[0]}</span>
+                          <span className="search-result-avatar-text">{meeting.Name[0]}</span>
                         </div>
                         <div>
-                          <div className="search-result-name">{room.Name}</div>
+                          <div className="search-result-name">{meeting.Name}</div>
                           <div className="search-result-department">
-                            {room.Type} Room • Capacity {room.capacity}
+                            {meeting.Type} Room • Capacity {meeting.capacity}
                           </div>
                         </div>
                       </div>
                       <div className="search-result-location">
                         <div className="search-result-seat">
                           <MapPin className="search-result-map-pin-icon" />
-                          {room.roomNumber}
+                          {meeting.roomNumber}
                         </div>
                         <div className="search-result-floor-wing">
-                          Floor {room.floor} • Wing {room.wing}
+                          Floor {meeting.floor} • Wing {meeting.wing}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+                {!showOnlyMeetingRooms && filteredFacilityRooms.map((facility, index) => (
+                  <div
+                    key={index}
+                    onClick={() => selectFacilityRoom(facility)}
+                    className="search-result-item group"
+                  >
+                    <div className="search-result-content">
+                      <div className="search-result-employee-info">
+                        <div className="search-result-avatar-wrapper">
+                          <span className="search-result-avatar-text">{facility.Type[0]}</span>
+                        </div>
+                        <div>
+                          <div className="search-result-name">{facility.Type}</div>
+                          {/* <div className="search-result-department">
+                            {room.Type}
+                          </div> */}
+                        </div>
+                      </div>
+                      <div className="search-result-location">
+                        <div className="search-result-seat">
+                          <MapPin className="search-result-map-pin-icon" />
+                          {facility.roomNumber}
+                        </div>
+                        <div className="search-result-floor-wing">
+                          Floor {facility.floor} • Wing {facility.wing}
                         </div>
                       </div>
                     </div>
@@ -458,14 +548,16 @@ useEffect(() => {
           {searchValue.trim() &&
             filteredEmployees.length === 0 &&
             filteredMeetingRooms.length === 0 &&
+            filteredFacilityRooms.length === 0 &&
             !selectedEmployee &&
-            !selectedRoom && (
+            !selectedMeetingRoom &&
+            !selectedFacilityRoom && (
               <div className="no-employees-found-container">
                 <div className="no-employees-found-message">
-                  No employees found matching your search
+                  No results found matching your search
                 </div>
                 <div className="no-employees-found-tip">
-                  Try searching by name, seat number, or department
+                  Try searching by name or seat number
                 </div>
               </div>
             )}
