@@ -10,6 +10,8 @@ interface SeatFinderProps {
   searchValue: string;
   setSearchValue: (value: string) => void;
   onShowOnMap: (valueSearch: string, valueLocation:string) => void;
+  onSetMyLocation: (location: string) => void;
+  onSetTargetLocation: (location: string) => void;
 }
 
 type SortBy = 'firstName' | 'lastName' | 'seat';
@@ -17,7 +19,7 @@ type OrderBy = 'asc' | 'desc';
 
 
 
-const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
+const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap, onSetMyLocation, onSetTargetLocation }) => {
   const [searchValue, setSearchValue] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [selectedMeetingRoom, setSelectedMeetingRoom] = useState<MeetingRoom | null>(null);
@@ -27,6 +29,8 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap }) => {
   const [myLocation, setMyLocation] = useState(() => {
     return localStorage.getItem('myLocation') || '';
   });
+  const [selectedMyLocation, setSelectedMyLocation] = useState<string | null>(null); // New state
+  const [selectedTargetLocation, setSelectedTargetLocation] = useState<string | null>(null); // New state
   const [showMyLocation, setShowMyLocation] = useState(false);
   const [showLocationInput, setShowLocationInput] = useState(false);
   const [showOnlyMeetingRooms, setShowOnlyMeetingRooms] = useState(false);
@@ -227,6 +231,7 @@ useEffect(() => {
   const handleShowOnMap = () => {
   console.log ('debug - show on map',{searchValue,myLocation}, selectedMeetingRoom?.roomNumber, selectedFacilityRoom?.roomNumber);
     let location = '';
+    if (selectedMyLocation) {location = selectedMyLocation}
     if (showMyLocation) {location = myLocation}
     if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,location)}
     else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,location);}
@@ -291,79 +296,136 @@ useEffect(() => {
                 </button>
               </div>
               {(selectedEmployee.floor === 4 || selectedEmployee.floor === 3 || selectedEmployee.floor === 2 || selectedEmployee.floor === 1) && (
-                <button
-                  className="map-toggle-button"
-                  onClick={handleShowOnMap}
-                >
-                  Show on Map
-                </button>
-              )}
-            </div>
-          )}
-
-          {selectedMeetingRoom && (
-            <div className="selected-employee-container">
-              <div className="selected-employee-info-wrapper">
-                <div className="selected-employee-details">
-                  <div className="selected-employee-icon-wrapper">
-                    <Building2 className="selected-employee-icon" />
+                <div className="selected-item-actions">
+                  <button
+                    className="map-toggle-button"
+                    onClick={handleShowOnMap}
+                  >
+                    Show on Map
+                  </button>
+                    <button
+                      className="map-toggle-button"
+                      onClick={() => {
+                        onSetMyLocation(selectedEmployee.seatNumber);
+                        setSelectedMyLocation(selectedEmployee.seatNumber);
+                      }}
+                    >
+                      Set as Current Location
+                    </button>
+                    <button
+                      className="map-toggle-button"
+                      onClick={() => {
+                        onSetTargetLocation(selectedEmployee.seatNumber)
+                        setSelectedTargetLocation(selectedEmployee.seatNumber);
+                      }}
+                    >
+                      Set as Target
+                    </button>
                   </div>
-                  <div>
-                    <div className="selected-employee-name">{selectedMeetingRoom.Name}</div>
-                    <div className="selected-employee-department">
-                      Room {selectedMeetingRoom.roomNumber} • Floor {selectedMeetingRoom.floor} • Wing {selectedMeetingRoom.wing} • Capacity {selectedMeetingRoom.capacity} • {selectedMeetingRoom.Type} Room
+                )}
+              </div>
+            )}
+  
+            {selectedMeetingRoom && (
+              <div className="selected-employee-container">
+                <div className="selected-employee-info-wrapper">
+                  <div className="selected-employee-details">
+                    <div className="selected-employee-icon-wrapper">
+                      <Building2 className="selected-employee-icon" />
+                    </div>
+                    <div>
+                      <div className="selected-employee-name">{selectedMeetingRoom.Name}</div>
+                      <div className="selected-employee-department">
+                        Room {selectedMeetingRoom.roomNumber} • Floor {selectedMeetingRoom.floor} • Wing {selectedMeetingRoom.wing} • Capacity {selectedMeetingRoom.capacity} • {selectedMeetingRoom.Type} Room
+                      </div>
                     </div>
                   </div>
+                  <button
+                    onClick={clearSelection}
+                    className="selected-employee-close-button"
+                  >
+                    <X className="selected-employee-close-icon" />
+                  </button>
                 </div>
-                <button
-                  onClick={clearSelection}
-                  className="selected-employee-close-button"
-                >
-                  <X className="selected-employee-close-icon" />
-                </button>
-              </div>
-              {(selectedMeetingRoom.floor === 4 || selectedMeetingRoom.floor === 3 || selectedMeetingRoom.floor === 2 || selectedMeetingRoom.floor === 1) && (
-              <button
-                className="map-toggle-button"
-                onClick={handleShowOnMap}
-              >
-                Show on Map
-              </button>
-              )}
-            </div>
-          )}
-
-          {selectedFacilityRoom && (
-            <div className="selected-employee-container">
-              <div className="selected-employee-info-wrapper">
-                <div className="selected-employee-details">
-                  <div className="selected-employee-icon-wrapper">
-                    <Building2 className="selected-employee-icon" />
+                {(selectedMeetingRoom.floor === 4 || selectedMeetingRoom.floor === 3 || selectedMeetingRoom.floor === 2 || selectedMeetingRoom.floor === 1) && (
+                  <div className="selected-item-actions">
+                    <button
+                      className="map-toggle-button"
+                      onClick={handleShowOnMap}
+                    >
+                      Show on Map
+                    </button>
+                    <button
+                      className="map-toggle-button"
+                      onClick={() => {
+                        onSetMyLocation(selectedMeetingRoom.roomNumber);
+                        setSelectedMyLocation(selectedMeetingRoom.roomNumber);
+                      }}
+                    >
+                      Set as Current Location
+                    </button>
+                    <button
+                      className="map-toggle-button"
+                      onClick={() => {
+                        onSetTargetLocation(selectedMeetingRoom.roomNumber);
+                        setSelectedTargetLocation(selectedMeetingRoom.roomNumber);
+                      }}
+                    >
+                      Set as Target
+                    </button>
                   </div>
-                  <div>
-                    <div className="selected-employee-name">{selectedFacilityRoom.Type}</div>
-                    <div className="selected-employee-department">
-                      Room <strong>{selectedFacilityRoom.roomNumber}</strong> • Floor {selectedFacilityRoom.floor} • Wing {selectedFacilityRoom.wing}
+                )}
+              </div>
+            )}
+  
+            {selectedFacilityRoom && (
+              <div className="selected-employee-container">
+                <div className="selected-employee-info-wrapper">
+                  <div className="selected-employee-details">
+                    <div className="selected-employee-icon-wrapper">
+                      <Building2 className="selected-employee-icon" />
+                    </div>
+                    <div>
+                      <div className="selected-employee-name">{selectedFacilityRoom.Type}</div>
+                      <div className="selected-employee-department">
+                        Room <strong>{selectedFacilityRoom.roomNumber}</strong> • Floor {selectedFacilityRoom.floor} • Wing {selectedFacilityRoom.wing}
+                      </div>
                     </div>
                   </div>
+                  <button
+                    onClick={clearSelection}
+                    className="selected-employee-close-button"
+                  >
+                    <X className="selected-employee-close-icon" />
+                  </button>
                 </div>
-                <button
-                  onClick={clearSelection}
-                  className="selected-employee-close-button"
-                >
-                  <X className="selected-employee-close-icon" />
-                </button>
+                {(selectedFacilityRoom.floor === 4 || selectedFacilityRoom.floor === 3 || selectedFacilityRoom.floor === 2 || selectedFacilityRoom.floor === 1) && (
+                  <div className="selected-item-actions">
+                    <button
+                      className="map-toggle-button"
+                      onClick={handleShowOnMap}
+                    >
+                      Show on Map
+                    </button>
+                    <button
+                      className="map-toggle-button"
+                      onClick={() => {
+                        onSetMyLocation(selectedFacilityRoom.roomNumber);
+                        setSelectedMyLocation(selectedFacilityRoom.roomNumber);
+                      }}
+                    >
+                      Set as Current Location
+                    </button>
+                    <button
+                      className="map-toggle-button"
+                      onClick={() => onSetTargetLocation(selectedFacilityRoom.roomNumber)}
+                    >
+                      Set as Target
+                    </button>
+                  </div>
+                )}
               </div>
-              {(selectedFacilityRoom.floor === 4 || selectedFacilityRoom.floor === 3 || selectedFacilityRoom.floor === 2 || selectedFacilityRoom.floor === 1) && (
-              <button
-                className="map-toggle-button"
-                onClick={handleShowOnMap}
-              >
-                Show on Map
-              </button>
-              )}
-            </div>
-          )}
+            )}
 
           {shouldShowResults && (
             <div className="search-results-container">

@@ -20,7 +20,7 @@ const AppContent: React.FC = () => {
 
   useEffect(() => {
     if (showMap && floorPlanRef.current) {
-      floorPlanRef.current.scrollIntoView({ behavior: 'smooth' });
+      floorPlanRef.current.scrollIntoView({ behavior: 'smooth' , block:'center'});
     }
   }, [showMap]);
 
@@ -56,6 +56,13 @@ const AppContent: React.FC = () => {
           setSearchValue(value);
           setMyLocation(value2);
           setShowMap(true);
+        }}
+        onSetMyLocation={(location) => {
+          setMyLocation(location);
+          localStorage.setItem('myLocation', location); // Also update localStorage
+        }}
+        onSetTargetLocation={(location) => {
+          setSearchValue(location);
         }}
       />
 

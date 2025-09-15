@@ -82,7 +82,20 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     fetchData();
   }, []);
 
-  console.log ('Debug - ALL points from DB', allPointsList);
+  const allSearchableRooms = React.useMemo(() => {
+    const all: (Point | MeetingRoom | FacilityRoom | Employee)[] = [];
+    Object.values(allPointsList).flat().forEach(point => {
+      if (!point.label.startsWith('J') && !point.label.startsWith('B')) {
+        all.push(point);
+      }
+    });
+    meetingRoomList.forEach(room => all.push(room));
+    facilityRoomList.forEach(room => all.push(room));
+    employeeList.forEach(employee => all.push(employee));
+    return all;
+  }, [allPointsList, meetingRoomList, facilityRoomList, employeeList]);
+
+  // console.log ('Debug - ALL points from DB', allPointsList);
 
 
   useEffect(() => {
@@ -106,57 +119,39 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     localStorage.setItem('floorplan-target-color', targetColor);
   }, [targetColor]);
 
-  
-  const allSearchableRooms = React.useMemo(() => {
-    const all: (Point | MeetingRoom | FacilityRoom | Employee)[] = [];
-    Object.values(allPointsList).flat().forEach(point => {
-      if (!point.label.startsWith('J') && !point.label.startsWith('B')) {
-        all.push(point);
+  // Effect to update internal search state when targetRoom prop changes externally
+  useEffect(() => {
+    if (targetRoom) {
+      const foundItem = allSearchableRooms.find(item => {
+        if ('label' in item && item.label === targetRoom) return true;
+        if (('Name' in item || 'Type' in item) && 'roomNumber' in item && item.roomNumber === targetRoom) return true;
+        if ('firstName' in item && 'seatNumber' in item && item.seatNumber === targetRoom) return true;
+        return false;
+      });
+      if (foundItem) {
+        setSelectedTargetRoomData(foundItem);
+        if ('label' in foundItem) {
+          setTargetRoomSearchValue(foundItem.label);
+        } else if ('Name' in foundItem) {
+          setTargetRoomSearchValue(foundItem.Name);
+        } else if ('Type' in foundItem) {
+          setTargetRoomSearchValue(foundItem.Type);
+        } else if ('firstName' in foundItem) {
+          setTargetRoomSearchValue(`${foundItem.firstName} ${foundItem.lastName}`);
+        }
+      } else {
+        // If targetRoom is set externally but not found in searchable rooms,
+        // clear internal search states to avoid stale data.
+        setSelectedTargetRoomData(null);
+        setTargetRoomSearchValue(targetRoom); // Keep the raw targetRoom value in search input
       }
-    });
-    meetingRoomList.forEach(room => all.push(room));
-    facilityRoomList.forEach(room => all.push(room));
-    employeeList.forEach(employee => all.push(employee));
-    return all;
-  }, [allPointsList, meetingRoomList, facilityRoomList, employeeList]);
-
-  React.useEffect(() => {
-    const trimmedQuery = targetRoomSearchValue.trim().toLowerCase();
-    if (!trimmedQuery) {
-      setFilteredTargetRooms([]);
-      return;
+    } else {
+      // If targetRoom is cleared externally, clear internal search states
+      setSelectedTargetRoomData(null);
+      setTargetRoomSearchValue('');
     }
+  }, [targetRoom, allSearchableRooms]); // Depend on targetRoom and allSearchableRooms
 
-    const filtered = allSearchableRooms.filter(item => {
-      if ('Name' in item && 'roomNumber' in item) { // MeetingRoom
-        const roomName = item.Name.toLowerCase();
-        const roomNumber = item.roomNumber.toLowerCase();
-        return roomName.includes(trimmedQuery) || roomNumber.includes(trimmedQuery);
-      } else if ('Type' in item && 'roomNumber' in item) { // FacilityRoom
-        const roomType = item.Type.toLowerCase();
-        const roomNumber = item.roomNumber.toLowerCase();
-        return roomType.includes(trimmedQuery) || roomNumber.includes(trimmedQuery);
-      } else if ('firstName' in item && 'lastName' in item) { // Employee
-        const firstName = item.firstName.toLowerCase();
-        const lastName = item.lastName.toLowerCase();
-        const seatNumber = item.seatNumber.toLowerCase();
-        const fullName = `${firstName} ${lastName}`;
-        const reverseFullName = `${lastName} ${firstName}`;
-        return (
-          firstName.includes(trimmedQuery) ||
-          lastName.includes(trimmedQuery) ||
-          seatNumber.includes(trimmedQuery) ||
-          fullName.includes(trimmedQuery) ||
-          reverseFullName.includes(trimmedQuery)
-        );
-      } else if ('label' in item) { // Point
-        const label = item.label.toLowerCase();
-        return label.includes(trimmedQuery);
-      }
-      return false;
-    });
-    setFilteredTargetRooms(filtered);
-  }, [targetRoomSearchValue, allSearchableRooms]);
 
   const selectedPoints = displayedFloor ? allPointsList[displayedFloor] ?? [] : [];
   const filteredPoints = selectedPoints.filter(point => (!point.label.startsWith('J')&&!point.label.startsWith('B')));

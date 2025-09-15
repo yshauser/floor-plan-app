@@ -539,3 +539,9 @@
 .retry-button:hover, .refresh-button:hover {
   background-color: #0056b3;
 }
+
+.selected-item-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}

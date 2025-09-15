@@ -13,7 +13,7 @@ interface HeaderProps {
   isDevModeEnabled: boolean;
   setDevModeEnabled: (value: boolean) => void;
 }
-const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation= true , setShowNavigation,isDevModeEnabled, setDevModeEnabled }) => {
+const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation, setShowNavigation,isDevModeEnabled, setDevModeEnabled }) => {
   const { user, logout } = useAuth();
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
