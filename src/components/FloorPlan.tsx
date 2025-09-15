@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react'; 
-import type { Point } from '../types';
-import { Search, Navigation, X, Route, RotateCcw } from 'lucide-react'; 
+import type { Point, MeetingRoom, FacilityRoom, Employee } from '../types';
+import { Search, Navigation, X, Route, RotateCcw, Building2, Users } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import './FloorPlan.css';
-import { getAllPointsFromAllMaps } from '../services/firestoreService';
+import { getAllPointsFromAllMaps, getMeetingRooms, getFacilityRooms, getEmployees } from '../services/firestoreService';
 import { PathRenderer, usePathfinding } from './pathfinding'; // Import pathfinding functions
 
 interface FloorPlanProps {
@@ -28,19 +28,25 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   myLocation, 
   setMyLocation, 
   startColor, 
-  setStartColor, 
+  // setStartColor, 
   targetColor, 
-  setTargetColor,
+  // setTargetColor,
   onClose 
 }) => {
   const [showPoints, setShowPoints] = useState<boolean>(false);
   const [showJunctions, setShowJunctions] = useState<boolean>(false);
-  const [startSize, setStartSize] = useState<number>(8);
-  const [targetSize, setTargetSize] = useState<number>(8);
+  const [showMeetingRooms, setShowMeetingRooms] = useState<boolean>(false);
+  // const [startSize, setStartSize] = useState<number>(18);
+  const startSize = 18;
+  // const [targetSize, setTargetSize] = useState<number>(18);
+  const targetSize = 18;
   const [showPath, setShowPath] = useState<boolean>(false);
-  const [pathColor, setPathColor] = useState<string>('#ff0000');
-  const [pathWidth, setPathWidth] = useState<number>(2);
-  const [showPathLine, setShowPathLine] = useState<boolean>(false);
+  // const [pathColor, setPathColor] = useState<string>('#ff0000');
+  const pathColor = '#ff0000';
+  // const [pathWidth, setPathWidth] = useState<number>(2);
+  const pathWidth = 2;
+  // const [showPathLine, setShowPathLine] = useState<boolean>(false);
+  const showPathLine = false;
   const [displayedFloor, setDisplayedFloor] = useState<string | null>(null);
   const [useStairs, setUseStairs] = useState<boolean>(true);
   const [useElevator, setUseElevator] = useState<boolean>(true);
@@ -49,21 +55,34 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   const myLocationFloorChar = myLocation ? myLocation.charAt(0) : null;
 
   const [allPointsList, setAllPointsList] = useState<Record<string, Point[]>>({});
+  const [meetingRoomList, setMeetingRoomList] = useState<MeetingRoom[]>([]);
+  const [facilityRoomList, setFacilityRoomList] = useState<FacilityRoom[]>([]);
+  const [employeeList, setEmployeeList] = useState<Employee[]>([]);
+  const [targetRoomSearchValue, setTargetRoomSearchValue] = useState('');
+  const [filteredTargetRooms, setFilteredTargetRooms] = useState<(Point | MeetingRoom | FacilityRoom | Employee)[]>([]);
+  const [selectedTargetRoomData, setSelectedTargetRoomData] = useState<Point | MeetingRoom | FacilityRoom | Employee | null>(null);
 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         const allPoints = await getAllPointsFromAllMaps();
+        const meetingRooms = await getMeetingRooms();
+        const facilityRooms = await getFacilityRooms();
+        const employees = await getEmployees();
         setAllPointsList(allPoints);
-      } catch (error) {
+        setMeetingRoomList(meetingRooms);
+        setFacilityRoomList(facilityRooms);
+        setEmployeeList(employees);
+      } catch (error)
+      {
         console.error('Error loading data:', error);
       }
     };
     fetchData();
   }, []);
 
-  // console.log ('Debug - ALL points from DB', allPointsList);
+  console.log ('Debug - ALL points from DB', allPointsList);
 
 
   useEffect(() => {
@@ -88,16 +107,62 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   }, [targetColor]);
 
   
-// const pointsMap: Record<string, Point[]> = React.useMemo(() => {
-//   console.log ('here I am', allPointsList)
-//     const map: Record<string, Point[]> = {};
-//     return map;
-//   }, [allPointsList]);
+  const allSearchableRooms = React.useMemo(() => {
+    const all: (Point | MeetingRoom | FacilityRoom | Employee)[] = [];
+    Object.values(allPointsList).flat().forEach(point => {
+      if (!point.label.startsWith('J') && !point.label.startsWith('B')) {
+        all.push(point);
+      }
+    });
+    meetingRoomList.forEach(room => all.push(room));
+    facilityRoomList.forEach(room => all.push(room));
+    employeeList.forEach(employee => all.push(employee));
+    return all;
+  }, [allPointsList, meetingRoomList, facilityRoomList, employeeList]);
+
+  React.useEffect(() => {
+    const trimmedQuery = targetRoomSearchValue.trim().toLowerCase();
+    if (!trimmedQuery) {
+      setFilteredTargetRooms([]);
+      return;
+    }
+
+    const filtered = allSearchableRooms.filter(item => {
+      if ('Name' in item && 'roomNumber' in item) { // MeetingRoom
+        const roomName = item.Name.toLowerCase();
+        const roomNumber = item.roomNumber.toLowerCase();
+        return roomName.includes(trimmedQuery) || roomNumber.includes(trimmedQuery);
+      } else if ('Type' in item && 'roomNumber' in item) { // FacilityRoom
+        const roomType = item.Type.toLowerCase();
+        const roomNumber = item.roomNumber.toLowerCase();
+        return roomType.includes(trimmedQuery) || roomNumber.includes(trimmedQuery);
+      } else if ('firstName' in item && 'lastName' in item) { // Employee
+        const firstName = item.firstName.toLowerCase();
+        const lastName = item.lastName.toLowerCase();
+        const seatNumber = item.seatNumber.toLowerCase();
+        const fullName = `${firstName} ${lastName}`;
+        const reverseFullName = `${lastName} ${firstName}`;
+        return (
+          firstName.includes(trimmedQuery) ||
+          lastName.includes(trimmedQuery) ||
+          seatNumber.includes(trimmedQuery) ||
+          fullName.includes(trimmedQuery) ||
+          reverseFullName.includes(trimmedQuery)
+        );
+      } else if ('label' in item) { // Point
+        const label = item.label.toLowerCase();
+        return label.includes(trimmedQuery);
+      }
+      return false;
+    });
+    setFilteredTargetRooms(filtered);
+  }, [targetRoomSearchValue, allSearchableRooms]);
 
   const selectedPoints = displayedFloor ? allPointsList[displayedFloor] ?? [] : [];
   const filteredPoints = selectedPoints.filter(point => (!point.label.startsWith('J')&&!point.label.startsWith('B')));
   // console.log ('Debug - FILTER', {selectedPoints, filteredPoints, displayedFloor, allPointsList, targetFloorChar})
   const junctions = selectedPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
+  const meetingRooms = selectedPoints.filter(point => point.label.startsWith('Meeting'));
   // const allPoints = allPointsList;
   const allPoints: Point[] = Object.values(allPointsList).flat();
   const allJunctions = allPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
@@ -118,9 +183,9 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
       case '3':
         return '/floor-plan-app/FloorPlan_3_clear.png';
       case '4':
-        return '/floor-plan-app/FloorPlan_4.png';
+        return '/floor-plan-app/FloorPlan_4 - Copy.png';
       default:
-        return '/floor-plan-app/FloorPlan_4.png';
+        return '/floor-plan-app/FloorPlan_4 - Copy.png';
     }
   })();
 
@@ -129,6 +194,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   };
 
   const getPointColor = (label: string) => {
+    // console.log ('getPointColor', {startColor, targetColor})
     if (label === myLocation) return startColor;
     if (label === targetRoom) return targetColor;
     return 'red';
@@ -201,6 +267,38 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     setShowPath(false);
   }, [clearPath]);
 
+  const handleTargetRoomSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setTargetRoomSearchValue(event.target.value);
+    if (selectedTargetRoomData) {
+      setSelectedTargetRoomData(null);
+    }
+  };
+
+  const selectTargetRoom = (item: Point | MeetingRoom | FacilityRoom | Employee) => {
+    setSelectedTargetRoomData(item);
+    if ('label' in item) {
+      setTargetRoom(item.label);
+      setTargetRoomSearchValue(item.label);
+    } else if ('Name' in item) {
+      setTargetRoom(item.roomNumber);
+      setTargetRoomSearchValue(item.Name);
+    } else if ('Type' in item) {
+      setTargetRoom(item.roomNumber);
+      setTargetRoomSearchValue(item.Type);
+    } else if ('firstName' in item) {
+      setTargetRoom(item.seatNumber);
+      setTargetRoomSearchValue(`${item.firstName} ${item.lastName}`);
+    }
+    setFilteredTargetRooms([]); // Clear results after selection
+  };
+
+  const clearTargetRoomSelection = () => {
+    setSelectedTargetRoomData(null);
+    setTargetRoom('');
+    setTargetRoomSearchValue('');
+  };
+
+  const shouldShowTargetRoomResults = targetRoomSearchValue.trim() && filteredTargetRooms.length > 0 && !selectedTargetRoomData;
 
   return (
     <div className="floor-plan-container">
@@ -211,7 +309,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
           </div>
           <h2 className="floor-plan-title">Floor Map</h2>
           {onClose && (
-            <button 
+            <button
               onClick={onClose}
               className="floor-plan-close-button"
               aria-label="Close floor plan"
@@ -229,11 +327,54 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
               <input
                 type="text"
                 placeholder="Search rooms..."
-                value={targetRoom}
-                onChange={(e) => setTargetRoom(e.target.value.toUpperCase().replace(/\s+/g, ''))}
+                value={selectedTargetRoomData ?
+                  ('Name' in selectedTargetRoomData ? selectedTargetRoomData.Name :
+                  ('Type' in selectedTargetRoomData ? selectedTargetRoomData.Type :
+                  ('firstName' in selectedTargetRoomData ? `${selectedTargetRoomData.firstName} ${selectedTargetRoomData.lastName}` : selectedTargetRoomData.label)))
+                  : targetRoomSearchValue}
+                onChange={handleTargetRoomSearchChange}
                 className="floor-plan-input"
               />
+              {selectedTargetRoomData && (
+                <button
+                  className="clear-search-button"
+                  onClick={clearTargetRoomSelection}
+                  aria-label="Clear target room selection"
+                >
+                  <X className="floor-plan-search-icon" />
+                </button>
+              )}
             </div>
+            {shouldShowTargetRoomResults && (
+              <div className="floor-plan-search-results-container">
+                {filteredTargetRooms.map((item, index) => (
+                  <div
+                    key={index}
+                    onClick={() => selectTargetRoom(item)}
+                    className="floor-plan-search-result-item"
+                  >
+                    {'Name' in item ? (
+                      <>
+                        <Building2 size={16} />
+                        <span>{item.Name} ({item.roomNumber})</span>
+                      </>
+                    ) : 'Type' in item ? (
+                      <>
+                        <Building2 size={16} />
+                        <span>{item.Type} ({item.roomNumber})</span>
+                      </>
+                    ) : 'firstName' in item ? (
+                      <>
+                        <Users size={16} />
+                        <span>{item.firstName} {item.lastName} ({item.seatNumber})</span>
+                      </>
+                    ) : (
+                      <span>{item.label}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="floor-plan-room-input">
@@ -297,7 +438,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
         <div className="floor-plan-legend">
           <div className="floor-plan-legend-list">
             {/* Target */}
-            <div className="floor-plan-legend-item">
+            {/* <div className="floor-plan-legend-item">
               <label>Target</label>
               <div className="floor-plan-legend-controls">
                 <input 
@@ -314,10 +455,10 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                   className="floor-plan-color-picker"
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Start */}
-            <div className="floor-plan-legend-item">
+            {/* <div className="floor-plan-legend-item">
               <label>My location</label>
               <div className="floor-plan-legend-controls">
                 <input
@@ -334,10 +475,10 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                   className="floor-plan-color-picker"
                 />
               </div>
-            </div>
+            </div> */}
 
             {/* Path styling */}
-            {showNavigation && showPath && currentPath && (
+            {/* {showNavigation && showPath && currentPath && (
               <div className="floor-plan-legend-item">
                 <label>Path</label>
                 <div className="floor-plan-legend-controls">
@@ -364,7 +505,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                   </label>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
         </div>
 
@@ -396,7 +537,9 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                     Switch to Floor {displayedFloor === targetFloorChar ? myLocationFloorChar : targetFloorChar}
                   </button>
                 )}
-
+                <button onClick={() => setShowMeetingRooms(!showMeetingRooms)}>
+                  {showMeetingRooms ? 'Hide Meeting Rooms' : 'Show Meeting Rooms'}
+                </button>
               {isDevModeEnabled && (
                 <>
                 <button onClick={() => setShowPoints(!showPoints)}>
@@ -515,7 +658,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                       return (
                         <div
                           key={index}
-                          title={point.label}
+                          className="point"
                           style={{
                             position: 'absolute',
                             left: `${point.x}%`,
@@ -525,12 +668,15 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                             borderRadius: '50%',
                             width: `${getPointSize(point.label)}px`,
                             height: `${getPointSize(point.label)}px`,
-                            pointerEvents: 'auto',
-                            zIndex: 1002
+                            zIndex: 1002,
                           }}
-                        />
+                        >
+                          <span className="tooltip">{point.label}</span>
+                        </div>
                       );
                     })}
+
+
 
                     {/* Render junctions points */}
                    {junctions.map((point: Point, index: number) => {
@@ -559,8 +705,41 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
 
                         }}
                       >
-                        {point.label}
+                        <span style={{marginTop: `${point.y+100}%`}}>{point.label}</span>
                       </div>
+                                              
+                    );
+                  })}
+
+                  {meetingRooms.map((point: Point, index: number) => {
+                    if (!showMeetingRooms) return null;
+                    return (
+                      <div
+                        key={index}
+                        style={{
+                          position: 'absolute',
+                          left: `${point.x}%`,
+                          top: `${point.y - 0.5}%`,
+                          transform: 'translate(-50%, -50%)',
+                          backgroundColor: getPointColor(point.label),
+                          borderRadius: '50%',
+                          width: `${getPointSize(point.label)}px`,
+                          height: `${getPointSize(point.label)}px`,
+                          pointerEvents: 'none',
+                          zIndex: 1002,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'black', // or any contrasting color
+                          fontSize: '10px', // adjust as needed
+                          textAlign: 'center',
+                          whiteSpace: 'nowrap', 
+
+                        }}
+                      >
+                        <span style={{marginTop: `${point.y+100}%`}}>{point.label}</span>
+                      </div>
+                                              
                     );
                   })}
                   </div>                

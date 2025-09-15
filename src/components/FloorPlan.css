@@ -103,7 +103,7 @@
 .floor-plan-legend {
   margin-top: 2px;
   padding: 0.5rem 1rem 1rem 1rem;
-  background-color: #f9f9f9;
+  /* background-color: #f9f9f9; */
   border-radius: 8px;
 }
 
@@ -272,4 +272,83 @@ input[type="range"]:active {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.point {
+  position: relative; /* needed so tooltip is positioned relative to point */
+  pointer-events: auto; /* allow hover */
+}
+
+.tooltip {
+  position: absolute;
+  top: -1.5rem; /* moves tooltip above the point */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: black;
+  color: white;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  display: none; /* hidden by default */
+  z-index: 9999;
+}
+
+.point:hover .tooltip {
+  display: block; /* show tooltip on hover */
+}
+
+.floor-plan-search-results-container {
+  position: absolute;
+  background-color: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 1000;
+  width: calc(100% - 1rem); /* Adjust width to match input, considering padding */
+  margin-top: 0.25rem;
+}
+
+.floor-plan-search-result-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  cursor: pointer;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.floor-plan-search-result-item:last-child {
+  border-bottom: none;
+}
+
+.floor-plan-search-result-item:hover {
+  background-color: #f0f4f8;
+}
+
+.floor-plan-search-result-item span {
+  font-size: 0.875rem;
+  color: #1e293b;
+}
+
+.floor-plan-search-result-item svg {
+  color: #64748b;
+}
+
+.clear-search-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 0.5rem;
+  color: #64748b;
+}
+
+.clear-search-button:hover {
+  color: #1e293b;
 }

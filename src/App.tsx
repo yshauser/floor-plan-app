@@ -9,7 +9,7 @@ import { checkEmployeeExists } from './services/firestoreService';
 const AppContent: React.FC = () => {
   const { user, login } = useAuth();
   const [showMap, setShowMap] = useState(false);
-  const [showNavigation, setShowNavigation] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(true);
   const [isDevModeEnabled, setDevModeEnabled] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [myLocation, setMyLocation] = useState('');
