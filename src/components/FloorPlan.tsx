@@ -153,11 +153,24 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   }, [targetRoom, allSearchableRooms]); // Depend on targetRoom and allSearchableRooms
 
 
+  const roomLabelToNameMap = React.useMemo(() => {
+    const map = new Map<string, string>();
+    meetingRoomList.forEach(room => map.set(room.roomNumber, room.Name));
+    facilityRoomList.forEach(room => map.set(room.roomNumber, room.Type));
+    return map;
+  }, [meetingRoomList, facilityRoomList]);
+
   const selectedPoints = displayedFloor ? allPointsList[displayedFloor] ?? [] : [];
   const filteredPoints = selectedPoints.filter(point => (!point.label.startsWith('J')&&!point.label.startsWith('B')));
   // console.log ('Debug - FILTER', {selectedPoints, filteredPoints, displayedFloor, allPointsList, targetFloorChar})
   const junctions = selectedPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
-  const meetingRooms = selectedPoints.filter(point => point.label.startsWith('Meeting'));
+  const meetingRoomNumbers = React.useMemo(() =>
+    meetingRoomList
+      .filter(room => room.Type === 'Meeting' || room.Type === 'Meeting + VC')
+      .map(room => room.roomNumber),
+    [meetingRoomList]
+  );
+  const meetingRooms = selectedPoints.filter(point => meetingRoomNumbers.includes(point.label));
   // const allPoints = allPointsList;
   const allPoints: Point[] = Object.values(allPointsList).flat();
   const allJunctions = allPoints.filter(point => point.label.startsWith('J') || point.label.startsWith('B'));
@@ -666,7 +679,9 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                             zIndex: 1002,
                           }}
                         >
-                          <span className="tooltip">{point.label}</span>
+                          <span className="tooltip">
+                             <span style={{marginTop: `${point.y+100}%`}}>{point.label}</span>
+                          </span>
                         </div>
                       );
                     })}
@@ -732,7 +747,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
 
                         }}
                       >
-                        <span style={{marginTop: `${point.y+100}%`}}>{point.label}</span>
+                          <span style={{marginTop: `${point.y+100}%`}}><strong>{roomLabelToNameMap.get(point.label) ? `${roomLabelToNameMap.get(point.label)} (${point.label})` : point.label}</strong></span>
                       </div>
                                               
                     );
