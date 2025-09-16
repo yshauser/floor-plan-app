@@ -12,7 +12,7 @@ interface HeaderProps {
   setShowNavigation: (value: boolean) => void;
   isDevModeEnabled: boolean;
   setDevModeEnabled: (value: boolean) => void;
-  userEmail: string; // New prop for displaying user email
+  userEmail: string;
 }
 const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation, setShowNavigation,isDevModeEnabled, setDevModeEnabled, userEmail }) => {
   const { logout } = useAuth(); // user is now passed as a prop
@@ -115,6 +115,8 @@ const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavig
           <h2>Seat Finder</h2>
             <p>Version: {packageJson.version}</p>
             <p>Date: {packageJson.date}</p>
+            <p>Logged in as: {userEmail}</p>
+            {/* <p>Seat Number: {userSeatNumber}</p> */}
             <button onClick={() => setShowAbout(false)} className="about-close-button">Close</button>
           </div>
         </div>

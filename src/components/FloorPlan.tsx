@@ -53,7 +53,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
 
   const targetFloorChar = targetRoom ? targetRoom.charAt(0) : null;
   const myLocationFloorChar = myLocation ? myLocation.charAt(0) : null;
-  console.log ('debud - floor char', {targetFloorChar, myLocationFloorChar})
+  // console.log ('debug - floor char', {targetFloorChar, myLocationFloorChar})
 
   const [allPointsList, setAllPointsList] = useState<Record<string, Point[]>>({});
   const [meetingRoomList, setMeetingRoomList] = useState<MeetingRoom[]>([]);
@@ -83,6 +83,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
       }
     };
     fetchData();
+    console.log ('fetch data for floorPlan functions');
   }, []);
 
   // console.log ('Debug - ALL points from DB', allPointsList);
@@ -260,7 +261,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   };
 
   const getPointColor = (label: string) => {
-    // console.log ('getPointColor', {startColor, targetColor})
+    // console.log ('debug - getPointColor', {startColor, targetColor})
     if (label === myLocation) return startColor;
     if (label === targetRoom) return targetColor;
     return 'red';

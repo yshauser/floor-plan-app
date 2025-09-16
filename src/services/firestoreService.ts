@@ -51,6 +51,21 @@ export const checkEmployeeExists = async (email: string): Promise<boolean> => {
   }
 };
 
+export const getEmployeeByEmail = async (email: string): Promise<Employee | null> => {
+  try {
+    const employeesRef = collection(db, EMPLOYEES_COLLECTION);
+    const q = query(employeesRef, where("email", "==", email.toLowerCase()));
+    const querySnapshot = await getDocs(q);
+    if (!querySnapshot.empty) {
+      return { id: querySnapshot.docs[0].id, ...querySnapshot.docs[0].data() } as unknown as Employee;
+    }
+    return null;
+  } catch (error) {
+    console.error("Error getting employee by email:", error);
+    throw error;
+  }
+};
+
 // Get meeting rooms specifically  
 export const getMeetingRooms = async (): Promise<MeetingRoom[]> => {
   return getCollection<MeetingRoom>(MEETINGROOMS_COLLECTION);

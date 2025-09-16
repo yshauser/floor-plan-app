@@ -1,17 +1,18 @@
 import React, { useState, useEffect, useMemo } from 'react';
-// import { employeeList2, meetingRoomList2 } from '../data/seatPlan';
 import { getEmployees, getMeetingRooms, getFacilityRooms } from '../services/firestoreService';
 import type { Employee, MeetingRoom, FacilityRoom } from '../types';
 import { Search, MapPin, Users, X, Building2 } from 'lucide-react';
 import './seatFinder.css';
-// import { values } from 'lodash';
+// some icons to consider in the future: 📍🧭🎯
 
 interface SeatFinderProps {
   searchValue: string;
   setSearchValue: (value: string) => void;
   onShowOnMap: (valueSearch: string, valueLocation:string) => void;
-  onSetMyLocation: (location: string) => void;
+  myLocation: string; // New prop
+  setMyLocation: (location: string) => void; // New prop
   onSetTargetLocation: (location: string) => void;
+  userSeatNumber: string;
 }
 
 type SortBy = 'firstName' | 'lastName' | 'seat';
@@ -19,29 +20,21 @@ type OrderBy = 'asc' | 'desc';
 
 
 
-const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap, onSetMyLocation, onSetTargetLocation }) => {
+const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap, myLocation, setMyLocation, onSetTargetLocation, userSeatNumber }) => {
   const [searchValue, setSearchValue] = useState('');
   const [selectedEmployee, setSelectedEmployee] = useState<any>(null);
   const [selectedMeetingRoom, setSelectedMeetingRoom] = useState<MeetingRoom | null>(null);
   const [selectedFacilityRoom, setSelectedFacilityRoom] = useState<FacilityRoom | null>(null);
   const [sortBy, setSortBy] = useState<SortBy>('firstName');
   const [orderBy, setOrderBy] = useState<OrderBy>('asc');
-  const [myLocation, setMyLocation] = useState(() => {
-    return localStorage.getItem('myLocation') || '';
-  });
-  const [selectedMyLocation, setSelectedMyLocation] = useState<string | null>(null); // New state
-  const [selectedTargetLocation, setSelectedTargetLocation] = useState<string | null>(null); // New state
-  const [showMyLocation, setShowMyLocation] = useState(false);
-  // const [showLocationInput, setShowLocationInput] = useState(false);
   const [showOnlyMeetingRooms, setShowOnlyMeetingRooms] = useState(false);
-  // const [tempLocation, setTempLocation] = useState(myLocation);
 
 const [employeeList, setEmployeeList] = useState<Employee[]>([]);
 const [meetingRoomList, setMeetingRoomList] = useState<MeetingRoom[]>([]);
 const [facilityRoomList, setFacilityRoomList] = useState<FacilityRoom[]>([]);
 
-console.log ('for removing errors after removing saveLocation option', selectedMyLocation, selectedTargetLocation,setShowMyLocation,setMyLocation)
-
+console.log ('for removing errors after removing saveLocation option', setMyLocation, onSetTargetLocation) // TBD - check if needed...
+// console.log ('debug - user seat', {userEmail, userSeatNumber, myLocation});
 useEffect(() => {
   const fetchData = async () => {
     try {
@@ -144,7 +137,7 @@ useEffect(() => {
       setShowOnlyMeetingRooms(false);
     }
     setSearchValue((event.target.value));//.trim()
-    console.log ('Debug - search value', event.target.value, "xx ", filteredMeetingRooms.length, filteredEmployees.length, filteredFacilityRooms.length, {showOnlyMeetingRooms},);
+    // console.log ('Debug - search value', event.target.value, "xx ", filteredMeetingRooms.length, filteredEmployees.length, filteredFacilityRooms.length, {showOnlyMeetingRooms},);
 
     // clearSelection();
   };
@@ -197,34 +190,6 @@ useEffect(() => {
     !selectedMeetingRoom && 
     !selectedFacilityRoom;
 
-  // const handleSetLocationClick= () => {
-  //   setTempLocation(myLocation);
-  //   setShowLocationInput(true);
-  // }
-  // const handleSaveLocation = () => {
-  //   setMyLocation(tempLocation);
-  //   localStorage.setItem('myLocation', tempLocation);
-  //   setShowLocationInput(false);
-  //   if (showMyLocation){ 
-  //     // push to FloorPlan if checkbox checked
-  //     if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,tempLocation)}
-  //     else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,tempLocation);}
-  //     else {onShowOnMap('',tempLocation);}
-  //   }
-  // };
-
-  // const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const checked = e.target.checked;
-  //   setShowMyLocation(checked);
-  //   if (checked && myLocation !== '') {
-  //     if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,myLocation)}
-  //     else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,myLocation);}
-  //     else {onShowOnMap('',myLocation);}
-  //   }else if (!checked){
-  //     setTempLocation('');
-  //   }
-  // };
-
   const hadnleShowOnlyMeetingRooms = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
     setShowOnlyMeetingRooms(checked);
@@ -232,13 +197,20 @@ useEffect(() => {
 
   const handleShowOnMap = () => {
   console.log ('debug - show on map',{searchValue,myLocation}, selectedMeetingRoom?.roomNumber, selectedFacilityRoom?.roomNumber);
-    let location = '';
-    if (myLocation && showMyLocation) {location = myLocation}
+    let location = myLocation;
     
     if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,location);}
     else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,location);}
     else if (selectedFacilityRoom?.roomNumber) {onShowOnMap(selectedFacilityRoom.roomNumber,location);}
     else {onShowOnMap('',location);}
+  }
+
+  const handleShowMe = () => {
+    let target = '';
+    if (selectedEmployee!==null) {target = selectedEmployee.seatNumber}
+    else if (selectedMeetingRoom?.roomNumber) {target = selectedMeetingRoom.roomNumber}
+    else if (selectedFacilityRoom?.roomNumber) {target = selectedFacilityRoom.roomNumber}
+    onShowOnMap(target, userSeatNumber )
   }
 
 
@@ -303,26 +275,8 @@ useEffect(() => {
                     className="map-toggle-button"
                     onClick={handleShowOnMap}
                   >
-                    Show on Map 📍
+                    Show on Map 
                   </button>
-                    <button
-                      className="map-toggle-button"
-                      onClick={() => {
-                        onSetMyLocation(selectedEmployee.seatNumber);
-                        setSelectedMyLocation(selectedEmployee.seatNumber);
-                      }}
-                    >
-                      Set as my Location 🧭
-                    </button>
-                    <button
-                      className="map-toggle-button"
-                      onClick={() => {
-                        onSetTargetLocation(selectedEmployee.seatNumber)
-                        setSelectedTargetLocation(selectedEmployee.seatNumber);
-                      }}
-                    >
-                      Set as Target 🎯
-                    </button>
                   </div>
                 )}
               </div>
@@ -357,24 +311,6 @@ useEffect(() => {
                     >
                       Show on Map
                     </button>
-                    <button
-                      className="map-toggle-button"
-                      onClick={() => {
-                        onSetMyLocation(selectedMeetingRoom.roomNumber);
-                        setSelectedMyLocation(selectedMeetingRoom.roomNumber);
-                      }}
-                    >
-                      Set as Current Location
-                    </button>
-                    <button
-                      className="map-toggle-button"
-                      onClick={() => {
-                        onSetTargetLocation(selectedMeetingRoom.roomNumber);
-                        setSelectedTargetLocation(selectedMeetingRoom.roomNumber);
-                      }}
-                    >
-                      Set as Target
-                    </button>
                   </div>
                 )}
               </div>
@@ -408,21 +344,6 @@ useEffect(() => {
                       onClick={handleShowOnMap}
                     >
                       Show on Map
-                    </button>
-                    <button
-                      className="map-toggle-button"
-                      onClick={() => {
-                        onSetMyLocation(selectedFacilityRoom.roomNumber);
-                        setSelectedMyLocation(selectedFacilityRoom.roomNumber);
-                      }}
-                    >
-                      Set as Current Location
-                    </button>
-                    <button
-                      className="map-toggle-button"
-                      onClick={() => onSetTargetLocation(selectedFacilityRoom.roomNumber)}
-                    >
-                      Set as Target
                     </button>
                   </div>
                 )}
@@ -556,9 +477,6 @@ useEffect(() => {
                         </div>
                         <div>
                           <div className="search-result-name">{facility.Type}</div>
-                          {/* <div className="search-result-department">
-                            {room.Type}
-                          </div> */}
                         </div>
                       </div>
                       <div className="search-result-location">
@@ -576,37 +494,18 @@ useEffect(() => {
               </div>
             </div>
           )}
-
-          {/* <div className="my-location-controls" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
-            {myLocation!== ''&& (
+            {/* remove this condition so the button will appear even if myLocation is empty (which will be filled automatically with user's seat) */}
+            {/* {myLocation!== ''&& ( */}
             <label>
-              <input
-                type="checkbox"
-                checked={showMyLocation}
-                onChange={handleCheckboxChange}
-              />
-              {' '}show my location ({myLocation})
+                     <button
+                      className="map-toggle-button"
+                      onClick={handleShowMe}
+                    >
+                      Find me on map
+                    </button>
+              {/* {' '}show my location ({userSeatNumber}) */}
             </label>
-            )}
-            <button className="set-location-button" 
-              onClick={handleSetLocationClick}
-              disabled={showLocationInput}
-              >
-              {myLocation === '' ? 'set my location' : 'edit my location'}
-            </button>
-          </div>
-          {showLocationInput && (
-            <div className="my-location-input" style={{ marginTop: '0.5rem', display: 'flex', gap: '0.5rem' }}>
-              <input
-                type="text"
-                value={tempLocation}
-                onChange={(e) => setTempLocation(e.target.value.toUpperCase().replace(/\s+/g, ''))} 
-                placeholder="Location not defined"
-                style={{ flex: 1, padding: '0.5rem', borderRadius: '0.5rem', border: '1px solid #ccc' }}
-              />
-              <button onClick={handleSaveLocation}>Save</button>
-            </div>
-          )} */}
+            {/* )} */}
 
 
           {searchValue.trim() &&

@@ -4,25 +4,48 @@ import SeatFinder from './components/seatFinder';
 import Header from './components/Header';
 import LoginDialog from './components/LoginDialog';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-// import { checkEmployeeExists } from './services/firestoreService';
+import { getEmployeeByEmail } from './services/firestoreService';
+import type { Employee } from './types';
 
 const AppContent: React.FC = () => {
-  const { user, loading } = useAuth(); //error ...
+  const { user, loading } = useAuth();
   const [showMap, setShowMap] = useState(false);
   const [showNavigation, setShowNavigation] = useState(true);
   const [isDevModeEnabled, setDevModeEnabled] = useState(false);
   const [searchValue, setSearchValue] = useState('');
-  const [myLocation, setMyLocation] = useState('');
+  const [myLocation, setMyLocation] = useState<string>(() => {
+    const storedLocation = localStorage.getItem('myLocation');
+    return storedLocation || '';
+  });
   const [targetColor, setTargetColor] = useState(()=> {return localStorage.getItem('floorplan-target-color') || '#000000'; });//black
   const [startColor, setStartColor] = useState(()=> {return localStorage.getItem('floorplan-start-color')|| '#0000ff'});//blue
+  const [employeeData, setEmployeeData] = useState<Employee | null>(null);
   const floorPlanRef = useRef<HTMLDivElement | null>(null);
-  // const [loginError, setLoginError] = useState<string | null>(null); // Removed
 
   useEffect(() => {
     if (showMap && floorPlanRef.current) {
       floorPlanRef.current.scrollIntoView({ behavior: 'smooth' , block:'center'});
     }
-  }, [showMap]);
+
+    const fetchEmployeeData = async () => {
+      if (user?.email) {
+        try {
+          const employee = await getEmployeeByEmail(user.email);
+          setEmployeeData(employee);
+        } catch (error) {
+          console.error("Error fetching employee data:", error);
+        }
+      }
+    };
+
+    fetchEmployeeData();
+  }, [showMap, user]);
+
+  useEffect(() => {
+    if (user && employeeData && !myLocation) {
+      setMyLocation(employeeData.seatNumber);
+    }
+  }, [user, employeeData]);
 
   // Removed handleLogin function
 
@@ -47,24 +70,23 @@ const AppContent: React.FC = () => {
         setShowNavigation={setShowNavigation}
         isDevModeEnabled={isDevModeEnabled}
         setDevModeEnabled={setDevModeEnabled}
-        userEmail={user.email || 'Guest'} // Pass user email to Header
+        userEmail={user.email || 'Guest'}
       />
       {/* <SeatFinder onShowOnMap={handleShowOnMap} /> */}
       <SeatFinder
         searchValue={searchValue}
         setSearchValue={setSearchValue}
         onShowOnMap={(value, value2) => {
-          setSearchValue(value);
+          if (value) {setSearchValue(value)}
           setMyLocation(value2);
           setShowMap(true);
         }}
-        onSetMyLocation={(location) => {
-          setMyLocation(location);
-          localStorage.setItem('myLocation', location); // Also update localStorage
-        }}
+        myLocation={myLocation}
+        setMyLocation={setMyLocation}
         onSetTargetLocation={(location) => {
           setSearchValue(location);
         }}
+        userSeatNumber={employeeData?.seatNumber || 'N/A'}
       />
 
       {showMap && (
