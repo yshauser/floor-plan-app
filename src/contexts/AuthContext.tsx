@@ -19,10 +19,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const auth = getAuth(app);
 
   // ActionCodeSettings for email link
+
   const actionCodeSettings = {
-    url: window.location.origin, // This should be your app's URL
-    handleCodeInApp: true,
-  };
+  url: 'https://yshauser.github.io/floor-plan-app/',
+  handleCodeInApp: true,
+};
+
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
