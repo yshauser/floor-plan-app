@@ -303,7 +303,7 @@ useEffect(() => {
                     className="map-toggle-button"
                     onClick={handleShowOnMap}
                   >
-                    Show on Map
+                    Show on Map 📍
                   </button>
                     <button
                       className="map-toggle-button"
@@ -312,7 +312,7 @@ useEffect(() => {
                         setSelectedMyLocation(selectedEmployee.seatNumber);
                       }}
                     >
-                      Set as Current Location
+                      Set as my Location 🧭
                     </button>
                     <button
                       className="map-toggle-button"
@@ -321,7 +321,7 @@ useEffect(() => {
                         setSelectedTargetLocation(selectedEmployee.seatNumber);
                       }}
                     >
-                      Set as Target
+                      Set as Target 🎯
                     </button>
                   </div>
                 )}
