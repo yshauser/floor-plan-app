@@ -27,7 +27,7 @@ const LoginDialog: React.FC<LoginDialogProps> = () => {
 
   return (
     <div className="login-dialog-overlay">
-      <header className="header">
+      <header className="login-header">
         <h1>Welcome to the Seat Finder App</h1>
       </header>
 
