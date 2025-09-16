@@ -1,17 +1,27 @@
 import React, { useState } from 'react';
-import './LoginDialog.css'; // We'll create this CSS file next
+import './LoginDialog.css';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginDialogProps {
-  onLogin: (email: string) => void;
-  errorMessage: string | null;
+  // onLogin: (email: string) => void; // No longer needed as login is handled by AuthContext
+  // errorMessage: string | null; // No longer needed as error is handled by AuthContext
 }
 
-const LoginDialog: React.FC<LoginDialogProps> = ({ onLogin, errorMessage }) => {
+const LoginDialog: React.FC<LoginDialogProps> = () => {
   const [email, setEmail] = useState('');
+  const [localError, setLocalError] = useState<string | null>(null); // New state for local validation errors
+  const { login, loading, error } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onLogin(email);
+    setLocalError(null); // Clear previous local errors
+
+    if (!email.endsWith('@rbbn.com')) {
+      setLocalError('App is available only for Ribbon employees');
+      return;
+    }
+
+    await login(email);
   };
 
   return (
@@ -27,10 +37,17 @@ const LoginDialog: React.FC<LoginDialogProps> = ({ onLogin, errorMessage }) => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              disabled={loading}
             />
           </div>
-          {errorMessage && <p className="error-message">{errorMessage}</p>}
-          <button type="submit">Login</button>
+          {(error || localError) && <p className="error-message">{error || localError}</p>}
+          {loading && <p className="loading-message">Sending sign-in link...</p>}
+          <button type="submit" disabled={loading}>
+            Send Sign-in Link
+          </button>
+          <p className="info-message">
+            A sign-in link will be sent to your email address. Click the link to log in.
+          </p>
         </form>
       </div>
     </div>

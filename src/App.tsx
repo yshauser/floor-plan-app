@@ -4,10 +4,10 @@ import SeatFinder from './components/seatFinder';
 import Header from './components/Header';
 import LoginDialog from './components/LoginDialog';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import { checkEmployeeExists } from './services/firestoreService';
+// import { checkEmployeeExists } from './services/firestoreService';
 
 const AppContent: React.FC = () => {
-  const { user, login } = useAuth();
+  const { user, loading } = useAuth(); //error ...
   const [showMap, setShowMap] = useState(false);
   const [showNavigation, setShowNavigation] = useState(true);
   const [isDevModeEnabled, setDevModeEnabled] = useState(false);
@@ -16,7 +16,7 @@ const AppContent: React.FC = () => {
   const [targetColor, setTargetColor] = useState(()=> {return localStorage.getItem('floorplan-target-color') || '#000000'; });//black
   const [startColor, setStartColor] = useState(()=> {return localStorage.getItem('floorplan-start-color')|| '#0000ff'});//blue
   const floorPlanRef = useRef<HTMLDivElement | null>(null);
-  const [loginError, setLoginError] = useState<string | null>(null);
+  // const [loginError, setLoginError] = useState<string | null>(null); // Removed
 
   useEffect(() => {
     if (showMap && floorPlanRef.current) {
@@ -24,18 +24,18 @@ const AppContent: React.FC = () => {
     }
   }, [showMap]);
 
-  const handleLogin = async (email: string) => {
-    const employeeExists = await checkEmployeeExists(email);
-    if (employeeExists) {
-      login(email);
-      setLoginError(null);
-    } else {
-      setLoginError("No such user/email found.");
-    }
-  };
+  // Removed handleLogin function
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
+        <p>Loading user session...</p>
+      </div>
+    );
+  }
 
   if (!user) {
-    return <LoginDialog onLogin={handleLogin} errorMessage={loginError} />;
+    return <LoginDialog />; // No props needed for LoginDialog now
   }
 
   return (
@@ -47,6 +47,7 @@ const AppContent: React.FC = () => {
         setShowNavigation={setShowNavigation}
         isDevModeEnabled={isDevModeEnabled}
         setDevModeEnabled={setDevModeEnabled}
+        userEmail={user.email || 'Guest'} // Pass user email to Header
       />
       {/* <SeatFinder onShowOnMap={handleShowOnMap} /> */}
       <SeatFinder

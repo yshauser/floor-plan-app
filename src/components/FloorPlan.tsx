@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect, useRef } from 'react';
 import type { Point, MeetingRoom, FacilityRoom, Employee } from '../types';
 import { Search, Navigation, X, Route, RotateCcw, Building2, Users } from 'lucide-react';
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
@@ -53,6 +53,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
 
   const targetFloorChar = targetRoom ? targetRoom.charAt(0) : null;
   const myLocationFloorChar = myLocation ? myLocation.charAt(0) : null;
+  console.log ('debud - floor char', {targetFloorChar, myLocationFloorChar})
 
   const [allPointsList, setAllPointsList] = useState<Record<string, Point[]>>({});
   const [meetingRoomList, setMeetingRoomList] = useState<MeetingRoom[]>([]);
@@ -61,6 +62,8 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   const [targetRoomSearchValue, setTargetRoomSearchValue] = useState('');
   const [filteredTargetRooms, setFilteredTargetRooms] = useState<(Point | MeetingRoom | FacilityRoom | Employee)[]>([]);
   const [selectedTargetRoomData, setSelectedTargetRoomData] = useState<Point | MeetingRoom | FacilityRoom | Employee | null>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  const [isSearchInputFocused, setIsSearchInputFocused] = useState(false);
 
 
   useEffect(() => {
@@ -82,25 +85,16 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     fetchData();
   }, []);
 
-  const allSearchableRooms = React.useMemo(() => {
-    const all: (Point | MeetingRoom | FacilityRoom | Employee)[] = [];
-    Object.values(allPointsList).flat().forEach(point => {
-      if (!point.label.startsWith('J') && !point.label.startsWith('B')) {
-        all.push(point);
-      }
-    });
-    meetingRoomList.forEach(room => all.push(room));
-    facilityRoomList.forEach(room => all.push(room));
-    employeeList.forEach(employee => all.push(employee));
-    return all;
-  }, [allPointsList, meetingRoomList, facilityRoomList, employeeList]);
-
   // console.log ('Debug - ALL points from DB', allPointsList);
 
 
   useEffect(() => {
-    setDisplayedFloor(targetFloorChar);
-  }, [targetFloorChar]);
+    if (targetRoom) {
+      setDisplayedFloor(targetFloorChar);
+    } else if (myLocation) {
+      setDisplayedFloor(myLocationFloorChar);
+    }
+  }, [targetRoom, myLocation, targetFloorChar, myLocationFloorChar]);
 
   const handleSwitchFloor = () => {
     setDisplayedFloor(current => current === targetFloorChar ? myLocationFloorChar : targetFloorChar);
@@ -109,6 +103,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   useEffect(() => {
     handleClearPath();
   },[targetRoom, myLocation]);
+
 
   // Save colors to localStorage whenever they change
   useEffect(() => {
@@ -119,39 +114,101 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     localStorage.setItem('floorplan-target-color', targetColor);
   }, [targetColor]);
 
-  // Effect to update internal search state when targetRoom prop changes externally
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setIsSearchInputFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [searchContainerRef]);
+
   useEffect(() => {
     if (targetRoom) {
-      const foundItem = allSearchableRooms.find(item => {
-        if ('label' in item && item.label === targetRoom) return true;
-        if (('Name' in item || 'Type' in item) && 'roomNumber' in item && item.roomNumber === targetRoom) return true;
-        if ('firstName' in item && 'seatNumber' in item && item.seatNumber === targetRoom) return true;
-        return false;
-      });
+      const foundItem =
+        employeeList.find(emp => emp.seatNumber === targetRoom) ||
+        meetingRoomList.find(room => room.roomNumber === targetRoom) ||
+        facilityRoomList.find(fac => fac.roomNumber === targetRoom);
+
       if (foundItem) {
         setSelectedTargetRoomData(foundItem);
-        if ('label' in foundItem) {
-          setTargetRoomSearchValue(foundItem.label);
+        if ('firstName' in foundItem) {
+          setTargetRoomSearchValue(`${foundItem.firstName} ${foundItem.lastName} (${foundItem.seatNumber})`);
         } else if ('Name' in foundItem) {
-          setTargetRoomSearchValue(foundItem.Name);
+          setTargetRoomSearchValue(`${foundItem.Name} (${foundItem.roomNumber})`);
         } else if ('Type' in foundItem) {
-          setTargetRoomSearchValue(foundItem.Type);
-        } else if ('firstName' in foundItem) {
-          setTargetRoomSearchValue(`${foundItem.firstName} ${foundItem.lastName}`);
+          setTargetRoomSearchValue(`${foundItem.Type} (${foundItem.roomNumber})`);
         }
       } else {
-        // If targetRoom is set externally but not found in searchable rooms,
-        // clear internal search states to avoid stale data.
+        // If targetRoom is set but no matching item found, clear previous selection
         setSelectedTargetRoomData(null);
-        setTargetRoomSearchValue(targetRoom); // Keep the raw targetRoom value in search input
+        setTargetRoomSearchValue(targetRoom); // Fallback to raw targetRoom if no match
       }
     } else {
-      // If targetRoom is cleared externally, clear internal search states
+      // If targetRoom prop becomes empty, clear selection and search value
       setSelectedTargetRoomData(null);
       setTargetRoomSearchValue('');
     }
-  }, [targetRoom, allSearchableRooms]); // Depend on targetRoom and allSearchableRooms
+  }, [targetRoom, employeeList, meetingRoomList, facilityRoomList]);
+    
+  const allSearchableRooms = React.useMemo(() => {
+    const all: (Point | MeetingRoom | FacilityRoom | Employee)[] = [];
+    const employeeSeatNumbers = new Set(employeeList.map(employee => employee.seatNumber));
+    const meetingRoomLabels = new Set(meetingRoomList.map(room => room.roomNumber));
+    const facilityRoomLabels = new Set(facilityRoomList.map(room => room.roomNumber));
 
+    Object.values(allPointsList).flat().forEach(point => {
+      if (!point.label.startsWith('J') && !point.label.startsWith('B') && !employeeSeatNumbers.has(point.label) && !meetingRoomLabels.has(point.label) && !facilityRoomLabels.has(point.label)) {
+        all.push(point);
+      }
+    });
+    meetingRoomList.forEach(room => all.push(room));
+    facilityRoomList.forEach(room => all.push(room));
+    employeeList.forEach(employee => all.push(employee));
+    return all;
+  }, [allPointsList, meetingRoomList, facilityRoomList, employeeList]);
+
+  React.useEffect(() => {
+    const trimmedQuery = targetRoomSearchValue.trim().toLowerCase();
+    if (!trimmedQuery) {
+      setFilteredTargetRooms([]);
+      return;
+    }
+
+    const filtered = allSearchableRooms.filter(item => {
+      if ('Name' in item && 'roomNumber' in item) { // MeetingRoom
+        const roomName = item.Name.toLowerCase();
+        const roomNumber = item.roomNumber.toLowerCase();
+        return roomName.includes(trimmedQuery) || roomNumber.includes(trimmedQuery);
+      } else if ('Type' in item && 'roomNumber' in item) { // FacilityRoom
+        const roomType = item.Type.toLowerCase();
+        const roomNumber = item.roomNumber.toLowerCase();
+        return roomType.includes(trimmedQuery) || roomNumber.includes(trimmedQuery);
+      } else if ('firstName' in item && 'lastName' in item) { // Employee
+        const firstName = item.firstName.toLowerCase();
+        const lastName = item.lastName.toLowerCase();
+        const seatNumber = item.seatNumber.toLowerCase();
+        const fullName = `${firstName} ${lastName}`;
+        const reverseFullName = `${lastName} ${firstName}`;
+        return (
+          firstName.includes(trimmedQuery) ||
+          lastName.includes(trimmedQuery) ||
+          seatNumber.includes(trimmedQuery) ||
+          fullName.includes(trimmedQuery) ||
+          reverseFullName.includes(trimmedQuery)
+        );
+      } else if ('label' in item) { // Point
+        const label = item.label.toLowerCase();
+        return label.includes(trimmedQuery);
+      }
+      return false;
+    });
+    setFilteredTargetRooms(filtered);
+  }, [targetRoomSearchValue, allSearchableRooms]);
 
   const roomLabelToNameMap = React.useMemo(() => {
     const map = new Map<string, string>();
@@ -198,6 +255,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
   })();
 
   const shouldShowPoint = (label: string) => {
+    // console.log ('debug - should show points', {label, myLocation, targetRoom})
     return showPoints || label === myLocation || label === targetRoom;
   };
 
@@ -306,7 +364,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
     setTargetRoomSearchValue('');
   };
 
-  const shouldShowTargetRoomResults = targetRoomSearchValue.trim() && filteredTargetRooms.length > 0 && !selectedTargetRoomData;
+  const shouldShowTargetRoomResults = targetRoomSearchValue.trim() && filteredTargetRooms.length > 0 && !selectedTargetRoomData && isSearchInputFocused;
 
   return (
     <div className="floor-plan-container">
@@ -328,7 +386,7 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
         </div>
         
         <div className="floor-plan-controls">
-          <div className="floor-plan-room-input">
+          <div className="floor-plan-room-input" ref={searchContainerRef}>
             <label className="floor-plan-label">Target Room</label>
             <div className="floor-plan-input-wrapper">
               <Search className="floor-plan-search-icon" />
@@ -336,16 +394,18 @@ const FloorPlan: React.FC<FloorPlanProps> = ({
                 type="text"
                 placeholder="Search rooms..."
                 value={selectedTargetRoomData ?
-                  ('Name' in selectedTargetRoomData ? selectedTargetRoomData.Name :
-                  ('Type' in selectedTargetRoomData ? selectedTargetRoomData.Type :
-                  ('firstName' in selectedTargetRoomData ? `${selectedTargetRoomData.firstName} ${selectedTargetRoomData.lastName}` : selectedTargetRoomData.label)))
+                  ('Name' in selectedTargetRoomData ? `${selectedTargetRoomData.Name} (${selectedTargetRoomData.roomNumber})` :
+                  ('Type' in selectedTargetRoomData ? `${selectedTargetRoomData.Type} (${selectedTargetRoomData.roomNumber})` :
+                  ('firstName' in selectedTargetRoomData ? `${selectedTargetRoomData.firstName} ${selectedTargetRoomData.lastName} (${selectedTargetRoomData.seatNumber})` : selectedTargetRoomData.label)))
                   : targetRoomSearchValue}
                 onChange={handleTargetRoomSearchChange}
+                onFocus={() => setIsSearchInputFocused(true)}
+                onBlur={() => setTimeout(() => setIsSearchInputFocused(false), 100)} // Delay to allow click on results
                 className="floor-plan-input"
               />
-              {selectedTargetRoomData && (
+              {(selectedTargetRoomData || targetRoomSearchValue) && (
                 <button
-                  className="clear-search-button"
+                  className="clear-search-button2"
                   onClick={clearTargetRoomSelection}
                   aria-label="Clear target room selection"
                 >

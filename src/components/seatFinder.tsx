@@ -32,13 +32,15 @@ const SeatFinder: React.FC<SeatFinderProps> = ({ onShowOnMap, onSetMyLocation, o
   const [selectedMyLocation, setSelectedMyLocation] = useState<string | null>(null); // New state
   const [selectedTargetLocation, setSelectedTargetLocation] = useState<string | null>(null); // New state
   const [showMyLocation, setShowMyLocation] = useState(false);
-  const [showLocationInput, setShowLocationInput] = useState(false);
+  // const [showLocationInput, setShowLocationInput] = useState(false);
   const [showOnlyMeetingRooms, setShowOnlyMeetingRooms] = useState(false);
-  const [tempLocation, setTempLocation] = useState(myLocation);
+  // const [tempLocation, setTempLocation] = useState(myLocation);
 
 const [employeeList, setEmployeeList] = useState<Employee[]>([]);
 const [meetingRoomList, setMeetingRoomList] = useState<MeetingRoom[]>([]);
 const [facilityRoomList, setFacilityRoomList] = useState<FacilityRoom[]>([]);
+
+console.log ('for removing errors after removing saveLocation option', selectedMyLocation, selectedTargetLocation,setShowMyLocation,setMyLocation)
 
 useEffect(() => {
   const fetchData = async () => {
@@ -195,33 +197,33 @@ useEffect(() => {
     !selectedMeetingRoom && 
     !selectedFacilityRoom;
 
-  const handleSetLocationClick= () => {
-    setTempLocation(myLocation);
-    setShowLocationInput(true);
-  }
-  const handleSaveLocation = () => {
-    setMyLocation(tempLocation);
-    localStorage.setItem('myLocation', tempLocation);
-    setShowLocationInput(false);
-    if (showMyLocation){ 
-      // push to FloorPlan if checkbox checked
-      if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,tempLocation)}
-      else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,tempLocation);}
-      else {onShowOnMap('',tempLocation);}
-    }
-  };
+  // const handleSetLocationClick= () => {
+  //   setTempLocation(myLocation);
+  //   setShowLocationInput(true);
+  // }
+  // const handleSaveLocation = () => {
+  //   setMyLocation(tempLocation);
+  //   localStorage.setItem('myLocation', tempLocation);
+  //   setShowLocationInput(false);
+  //   if (showMyLocation){ 
+  //     // push to FloorPlan if checkbox checked
+  //     if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,tempLocation)}
+  //     else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,tempLocation);}
+  //     else {onShowOnMap('',tempLocation);}
+  //   }
+  // };
 
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const checked = e.target.checked;
-    setShowMyLocation(checked);
-    if (checked && myLocation !== '') {
-      if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,myLocation)}
-      else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,myLocation);}
-      else {onShowOnMap('',myLocation);}
-    }else if (!checked){
-      setTempLocation('');
-    }
-  };
+  // const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const checked = e.target.checked;
+  //   setShowMyLocation(checked);
+  //   if (checked && myLocation !== '') {
+  //     if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,myLocation)}
+  //     else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,myLocation);}
+  //     else {onShowOnMap('',myLocation);}
+  //   }else if (!checked){
+  //     setTempLocation('');
+  //   }
+  // };
 
   const hadnleShowOnlyMeetingRooms = (e: React.ChangeEvent<HTMLInputElement>) => {
     const checked = e.target.checked;
@@ -231,9 +233,9 @@ useEffect(() => {
   const handleShowOnMap = () => {
   console.log ('debug - show on map',{searchValue,myLocation}, selectedMeetingRoom?.roomNumber, selectedFacilityRoom?.roomNumber);
     let location = '';
-    if (selectedMyLocation) {location = selectedMyLocation}
-    if (showMyLocation) {location = myLocation}
-    if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,location)}
+    if (myLocation && showMyLocation) {location = myLocation}
+    
+    if (selectedEmployee!==null) {onShowOnMap(selectedEmployee.seatNumber,location);}
     else if (selectedMeetingRoom?.roomNumber) {onShowOnMap(selectedMeetingRoom.roomNumber,location);}
     else if (selectedFacilityRoom?.roomNumber) {onShowOnMap(selectedFacilityRoom.roomNumber,location);}
     else {onShowOnMap('',location);}
@@ -575,7 +577,7 @@ useEffect(() => {
             </div>
           )}
 
-          <div className="my-location-controls" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
+          {/* <div className="my-location-controls" style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.5rem' }}>
             {myLocation!== ''&& (
             <label>
               <input
@@ -604,7 +606,7 @@ useEffect(() => {
               />
               <button onClick={handleSaveLocation}>Save</button>
             </div>
-          )}
+          )} */}
 
 
           {searchValue.trim() &&

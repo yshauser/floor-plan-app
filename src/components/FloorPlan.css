@@ -54,8 +54,10 @@
 
 .floor-plan-room-input {
   flex: 1 1 200px;
+  max-width: 300px; /* Added max-width to constrain the input and dropdown */
   display: flex;
   flex-direction: column;
+  position: relative; /* Added for positioning the dropdown */
 }
 
 .floor-plan-label {
@@ -307,8 +309,10 @@ input[type="range"]:active {
   max-height: 200px;
   overflow-y: auto;
   z-index: 1000;
-  width: calc(100% - 1rem); /* Adjust width to match input, considering padding */
+  width: 100%; /* Set width to 100% of its parent */
   margin-top: 0.25rem;
+  top: 100%; /* Position below the input wrapper */
+  left: 0;
 }
 
 .floor-plan-search-result-item {
@@ -337,18 +341,18 @@ input[type="range"]:active {
   color: #64748b;
 }
 
-.clear-search-button {
+.clear-search-button2 {
   background: none;
   border: none;
   cursor: pointer;
   padding: 0;
-  display: flex;
+  display: contents;
   align-items: center;
   justify-content: center;
   margin-left: 0.5rem;
   color: #64748b;
 }
 
-.clear-search-button:hover {
+.clear-search-button2:hover {
   color: #1e293b;
 }

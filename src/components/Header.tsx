@@ -12,9 +12,10 @@ interface HeaderProps {
   setShowNavigation: (value: boolean) => void;
   isDevModeEnabled: boolean;
   setDevModeEnabled: (value: boolean) => void;
+  userEmail: string; // New prop for displaying user email
 }
-const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation, setShowNavigation,isDevModeEnabled, setDevModeEnabled }) => {
-  const { user, logout } = useAuth();
+const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavigation, setShowNavigation,isDevModeEnabled, setDevModeEnabled, userEmail }) => {
+  const { logout } = useAuth(); // user is now passed as a prop
   const [isMenuOpen, setMenuOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [isSettingsOpen, setSettingsOpen] = useState(false);
@@ -89,7 +90,7 @@ const Header: React.FC<HeaderProps> = ({setStartColor, setTargetColor, showNavig
               </>
               )}
               <div onClick={() => { setShowLogoutConfirm(true); setMenuOpen(false); }}>
-                Logout ({user?.toLowerCase()})
+                Logout ({userEmail})
               </div>
             </div>
           )}
