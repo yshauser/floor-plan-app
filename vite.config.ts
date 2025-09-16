@@ -6,6 +6,9 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   base: '/floor-plan-app/',
+  build: {
+    outDir: 'dist',
+  },
   plugins: [react()],
   css: {
     postcss: './postcss.config.cjs',
@@ -16,3 +19,5 @@ export default defineConfig({
     strictPort: true,
   }
 })
+
+

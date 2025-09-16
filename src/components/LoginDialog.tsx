@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './LoginDialog.css';
 import { useAuth } from '../contexts/AuthContext';
+import packageJson from '../../package.json'; // Adjust path as needed
 
 interface LoginDialogProps {
   // onLogin: (email: string) => void; // No longer needed as login is handled by AuthContext
@@ -49,6 +50,7 @@ const LoginDialog: React.FC<LoginDialogProps> = () => {
             A sign-in link will be sent to your email address. Click the link to log in.
           </p>
         </form>
+        <div className="version-info">Ver: {packageJson.version}</div>
       </div>
     </div>
   );
